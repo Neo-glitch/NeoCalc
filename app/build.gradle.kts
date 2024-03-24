@@ -70,5 +70,5 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
     // for calculations on strings input
-    implementation("com.faendir.rhino:rhino-android:1.5.2")
+    implementation("com.faendir.rhino:rhino-android:1.6.0")
 }
