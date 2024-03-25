@@ -1,4 +1,4 @@
-package com.example.neocalc
+package com.example.neocalc.calculation.presentation
 
 data class CalculatorScreenUiState(
     val input: String = "",

@@ -1,9 +1,6 @@
-package com.example.neocalc
+package com.example.neocalc.calculation.presentation
 
-import android.os.Build
-import android.os.VibratorManager
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,15 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.neocalc.component.CalculatorButton
-import com.example.neocalc.ui.theme.Blue_2
+import com.example.neocalc.calculation.presentation.component.CalculatorButton
 import com.example.neocalc.ui.theme.CyanBlue
 import com.example.neocalc.ui.theme.ExtendedTheme
-import com.example.neocalc.ui.theme.LightBlack
-import com.example.neocalc.ui.theme.LinkWhite
-import com.example.neocalc.ui.theme.MediumGray
 import com.example.neocalc.ui.theme.poppins
-import org.mozilla.javascript.Context
 
 @Composable
 fun Calculator(

@@ -1,4 +1,4 @@
-package com.example.neocalc
+package com.example.neocalc.calculation.presentation
 
 sealed class CalculatorEvent {
     data class NumberEvent(val number: Int): CalculatorEvent()

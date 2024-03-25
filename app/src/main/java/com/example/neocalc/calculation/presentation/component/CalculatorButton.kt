@@ -1,4 +1,4 @@
-package com.example.neocalc.component
+package com.example.neocalc.calculation.presentation.component
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.clickable

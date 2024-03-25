@@ -1,4 +1,4 @@
-package com.example.neocalc
+package com.example.neocalc.calculation.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
