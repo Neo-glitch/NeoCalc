@@ -91,13 +91,13 @@ class CalculatorViewModel(
 
     private fun calculate() {
         val state = uiState.value
-        var firstNumber = state.input
-        if (firstNumber.isBlank()) {
+        var input = state.input
+        if (input.isBlank()) {
             return
         }
 
-        firstNumber = firstNumber.replace("÷", "/")
-        firstNumber = firstNumber.replace("%", "/100")
+        input = input.replace("÷", "/")
+        input = input.replace("%", "/100")
 
         val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
         context = rhinoAndroidHelper.enterContext()
@@ -105,7 +105,7 @@ class CalculatorViewModel(
         try {
             val scriptable = context?.initStandardObjects()
             val resultString =
-                context?.evaluateString(scriptable, firstNumber, "javascript", 1, null).toString()
+                context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
             val resultDouble = resultString.toDoubleOrNull() ?: 0.0
             val result = resultDouble.cleanDouble().toString()
             _uiState.update { it.copy(input = result, isError = false, result = "") }
@@ -116,14 +116,15 @@ class CalculatorViewModel(
 
     private fun performCalculationOnInputChange(){
         val state = uiState.value
-        var firstNumber = state.input
+        var input = state.input
 
-        if (firstNumber.isBlank()) {
+        if (input.isBlank()) {
+            _uiState.update { it.copy(result = "") }
             return
         }
 
-        firstNumber = firstNumber.replace("÷", "/")
-        firstNumber = firstNumber.replace("%", "/100")
+        input = input.replace("÷", "/")
+        input = input.replace("%", "/100")
 
         val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
         context = rhinoAndroidHelper.enterContext()
@@ -132,7 +133,7 @@ class CalculatorViewModel(
         val result = try {
             val scriptable = context?.initStandardObjects()
             val resultString =
-                context?.evaluateString(scriptable, firstNumber, "javascript", 1, null).toString()
+                context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
             val resultDouble = resultString.toDoubleOrNull() ?: 0.0
             resultDouble.cleanDouble().toString()
         } catch (e: Exception) {
