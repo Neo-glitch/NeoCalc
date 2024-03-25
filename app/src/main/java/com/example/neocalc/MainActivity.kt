@@ -47,7 +47,6 @@ private fun SetBarColor(color: Color){
         systemUiController.setSystemBarsColor(
             color = color,
             darkIcons = !isSystemInDarkMode,
-            isNavigationBarContrastEnforced = false
         )
     }
 }
