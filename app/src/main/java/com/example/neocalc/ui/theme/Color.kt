@@ -16,5 +16,7 @@ val Blue_2 = Color(0xFF1877F2) //Primary
 val DarkRed = Color(0xFFC30052) //Dark Error
 val LightRed = Color(0xFFFF84B7)
 
-val LightBlack = Color(0xFF080808) //Dark Surface
-val GreenShade = Color(0xFF17B87D)
+val LightBlack = Color(0xFF0F0F0F) //Dark Surface
+val LinkWhite = Color(0xFFF0F1F3)
+val LinkWhiteDarker = Color(0xFFEDEDF0)
+val CyanBlue = Color(0XFF00FFFF)

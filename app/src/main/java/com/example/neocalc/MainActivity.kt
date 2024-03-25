@@ -1,6 +1,11 @@
 package com.example.neocalc
 
+import android.content.Context
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -34,7 +39,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     val viewModel = viewModel<CalculatorViewModel>()
-//                    val state = viewModel.uiState
                     Calculator(viewModel = viewModel, buttonSpacing = 8.dp)
                 }
             }
@@ -53,21 +57,5 @@ private fun SetBarColor(color: Color){
             darkIcons = !isSystemInDarkMode,
             isNavigationBarContrastEnforced = false
         )
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NeoCalcTheme {
-        Greeting("Android")
     }
 }

@@ -1,6 +1,9 @@
 package com.example.neocalc
 
+import android.os.Build
+import android.os.VibratorManager
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,13 +14,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -25,11 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.neocalc.component.CalculatorButton
 import com.example.neocalc.ui.theme.Blue_2
-import com.example.neocalc.ui.theme.GreenShade
+import com.example.neocalc.ui.theme.CyanBlue
+import com.example.neocalc.ui.theme.ExtendedTheme
 import com.example.neocalc.ui.theme.LightBlack
-import com.example.neocalc.ui.theme.LightGray
+import com.example.neocalc.ui.theme.LinkWhite
 import com.example.neocalc.ui.theme.MediumGray
-import com.example.neocalc.ui.theme.Orange
+import com.example.neocalc.ui.theme.poppins
+import org.mozilla.javascript.Context
 
 @Composable
 fun Calculator(
@@ -40,7 +45,6 @@ fun Calculator(
 
     val state = viewModel.uiState
     val uiState = state.collectAsState()
-//    val uiState = state.collectAsState()
 
 
     Box(modifier = modifier) {
@@ -49,19 +53,39 @@ fun Calculator(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
         ) {
-            // the result field shown to the user
+
             Text(
-                text = uiState.value.firstNumber + (uiState.value.operation?.symbol
-                    ?: "") + uiState.value.secondNumber,
+                text = uiState.value.input,
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(32.dp),
+                    .padding(horizontal = 15.dp, vertical = 4.dp),
                 fontWeight = FontWeight.Medium,
-                fontSize = 40.sp,
-                color = Color.White,
+                fontFamily = poppins,
+                fontSize = 45.sp,
+                color = if (uiState.value.isError)
+                    MaterialTheme.colorScheme.error
+                else
+                    MaterialTheme.colorScheme.onSurface,
                 maxLines = 3
             )
+
+            Text(
+                text = uiState.value.result,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 4.dp),
+                fontWeight = FontWeight.Medium,
+                fontFamily = poppins,
+                fontSize = 30.sp,
+                color = if (uiState.value.isError)
+                    MaterialTheme.colorScheme.error
+                else
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                maxLines = 1
+            )
+
             Spacer(modifier = modifier.height(buttonSpacing))
             Column(
                 modifier
@@ -69,7 +93,7 @@ fun Calculator(
                     .clip(
                         RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                     )
-                    .background(LightBlack)
+                    .background(ExtendedTheme.colors.linkWhiteLightBlack)
                     .padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
@@ -78,11 +102,10 @@ fun Calculator(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
                 ) {
-                    // weight of this component in the row, if 2f
                     CalculatorButton(
-                        textColor = GreenShade,
+                        textColor = CyanBlue,
                         symbol = "AC", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -90,9 +113,9 @@ fun Calculator(
                     }
 
                     CalculatorButton(
-                        textColor = GreenShade,
+                        textColor = CyanBlue,
                         symbol = "%", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -100,9 +123,9 @@ fun Calculator(
                     }
 
                     CalculatorButton(
-                        textColor = GreenShade,
+                        textColor = CyanBlue,
                         symbol = "Del", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -111,7 +134,7 @@ fun Calculator(
 
                     CalculatorButton(
                         symbol = "÷", modifier = Modifier
-                            .background(Blue_2)
+                            .background(ExtendedTheme.colors.whiteBlue)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -125,7 +148,7 @@ fun Calculator(
                 ) {
                     CalculatorButton(
                         symbol = "7", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -133,7 +156,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "8", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -141,7 +164,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "9", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -149,7 +172,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "x", modifier = Modifier
-                            .background(Blue_2)
+                            .background(ExtendedTheme.colors.whiteBlue)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -164,7 +187,7 @@ fun Calculator(
                 ){
                     CalculatorButton(
                         symbol = "4", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -172,7 +195,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "5", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -180,7 +203,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "6", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -188,7 +211,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "-", modifier = Modifier
-                            .background(Blue_2)
+                            .background(ExtendedTheme.colors.whiteBlue)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -203,7 +226,7 @@ fun Calculator(
                 ){
                     CalculatorButton(
                         symbol = "1", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -211,7 +234,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "2", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -220,7 +243,7 @@ fun Calculator(
 
                     CalculatorButton(
                         symbol = "3", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -229,7 +252,7 @@ fun Calculator(
 
                     CalculatorButton(
                         symbol = "+", modifier = Modifier
-                            .background(Blue_2)
+                            .background(ExtendedTheme.colors.whiteBlue)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -239,20 +262,22 @@ fun Calculator(
 
                 // last row
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.
+                    height(70.dp).
+                    fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
                 ){
                     CalculatorButton(
                         symbol = "0", modifier = Modifier
-                            .background(MediumGray)
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(2f)
                             .weight(2f)
                     ) {
                         viewModel.onEvent(CalculatorEvent.NumberEvent(0))
                     }
                     CalculatorButton(
-                        symbol = ".", modifier = Modifier
-                            .background(MediumGray)
+                        symbol = "•", modifier = Modifier
+                            .background(ExtendedTheme.colors.linkWhiteMediumDarkGrey)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -260,7 +285,7 @@ fun Calculator(
                     }
                     CalculatorButton(
                         symbol = "=", modifier = Modifier
-                            .background(Blue_2)
+                            .background(ExtendedTheme.colors.whiteBlue)
                             .aspectRatio(1f)
                             .weight(1f)
                     ) {
@@ -268,10 +293,6 @@ fun Calculator(
                     }
                 }
             }
-
-
         }
     }
-
-
 }

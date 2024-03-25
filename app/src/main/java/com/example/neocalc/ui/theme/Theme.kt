@@ -9,6 +9,7 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -18,14 +19,16 @@ import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = Color.Black,
+    onPrimary = Color.White,
     tertiary = Pink80,
     surface = Color.Black,
     onSurface = Color.White,
-    error = DarkRed
+    error = Color.Red
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Color.White,
+    onPrimary = Color.Black,
     tertiary = Pink40,
     surface = Color.White,
     onSurface = Color.Black,
@@ -67,9 +70,35 @@ fun NeoCalcTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
-    )
+    val extendedColors = GetExtendedColors(isSystemInDarkTheme())
+    CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            content = content
+        )
+    }
+}
+
+
+@Composable
+fun GetExtendedColors(darkTheme: Boolean = isSystemInDarkTheme()): ExtendedColors {
+    return if (darkTheme)
+        ExtendedColors(
+            MediumGray,
+            Blue_2,
+            LightBlack
+        )
+    else
+        ExtendedColors(
+            LinkWhiteDarker,
+            Color.White,
+            LinkWhite.copy(alpha = 0.7f),
+        )
+}
+
+object ExtendedTheme {
+    val colors: ExtendedColors
+        @Composable
+        get() = LocalExtendedColors.current
 }
