@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.neocalc"
+    namespace = "com.neocalc.neocalc"
     compileSdk = 34
 
     signingConfigs {
@@ -17,7 +17,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.neocalc"
+        applicationId = "com.neocalc.neocalc"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
