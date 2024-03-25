@@ -37,21 +37,30 @@ class CalculatorViewModel(
 
     private fun enterOperation(operatorEvent: CalculatorOperation) {
         val state = uiState.value
-        var firstNumber = state.input
+        var input = state.input
+
         if (state.input.isLastCharOperator()) {
             // last character is operator, replace it
-            val substring = firstNumber.substring(0, firstNumber.length - 1)
-            firstNumber = substring + operatorEvent.symbol
+            val substring = input.substring(0, input.length - 1)
+            input = substring + operatorEvent.symbol
             _uiState.update {
-                it.copy(input = firstNumber)
+                it.copy(input = input)
             }
             performCalculationOnInputChange()
             return
         }
 
-        firstNumber += operatorEvent.symbol
+        if(input.isBlank()){
+            if(operatorEvent == CalculatorOperation.Add || operatorEvent == CalculatorOperation.Subtract){
+                input += operatorEvent.symbol
+                _uiState.update { it.copy(input = input) }
+            }
+            return
+        }
+
+        input += operatorEvent.symbol
         _uiState.update {
-            it.copy(input = firstNumber)
+            it.copy(input = input)
         }
         performCalculationOnInputChange()
     }
@@ -70,8 +79,9 @@ class CalculatorViewModel(
         val state = uiState.value
       when{
           state.input.isNotBlank() -> {
+              val input = uiState.value.input
               _uiState.update {
-                  it.copy(input = state.input.dropLast(1))
+                  it.copy(input = state.input.substring(0, input.length - 1))
               }
               performCalculationOnInputChange()
           }
