@@ -40,7 +40,7 @@ fun CalculatorButton(
         modifier = Modifier
             .clip(CircleShape)
             .clickable {
-//                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
+                view.performHapticFeedback(HapticFeedbackConstants.KEYBOARD_TAP)
                 onClick()
             }
             .shadow(
