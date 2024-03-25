@@ -15,8 +15,6 @@ I hereby state, to the best of my knowledge and belief, that I have not programm
 
 The list of permissions required by the app can be found in the `AndroidManifest.xml` file:
 
-https://github.com/Neo-glitch/NeoCalc/blob/d7f323c7769ad600d4f97eb499f3d7fa34a2a1fc/app/src/main/AndroidManifest.xml#L21-L38
-<br/>
 
 | Permission | Why it is required |
 | :---: | --- |
