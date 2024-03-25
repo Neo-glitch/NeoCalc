@@ -1,7 +1,14 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
 }
+
+val keyStorePropertiesFile = rootProject.file("keystore.properties")
+val keyStoreProperties = Properties()
+keyStoreProperties.load(FileInputStream(keyStorePropertiesFile))
 
 android {
     namespace = "com.neocalc.neocalc"
@@ -9,10 +16,10 @@ android {
 
     signingConfigs {
         create("release"){
-            keyAlias = "neoCalcApp"
-            keyPassword = "24neoCalcApp365."
-            storePassword = "24neoCalcApp365."
-            storeFile = file("\\neoCalc.jks")
+            keyAlias = keyStoreProperties["keyAlias"] as String
+            keyPassword = keyStoreProperties["keyPassword"] as String
+            storePassword = keyStoreProperties["storePassword"] as String
+            storeFile = file(keyStoreProperties["storeFile"] as String)
         }
     }
 
