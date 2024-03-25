@@ -98,6 +98,7 @@ class CalculatorViewModel(
 
         input = input.replace("÷", "/")
         input = input.replace("%", "/100")
+        input = input.replace("x", "*")
 
         val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
         context = rhinoAndroidHelper.enterContext()
@@ -125,6 +126,7 @@ class CalculatorViewModel(
 
         input = input.replace("÷", "/")
         input = input.replace("%", "/100")
+        input = input.replace("x", "*")
 
         val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
         context = rhinoAndroidHelper.enterContext()
