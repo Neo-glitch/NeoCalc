@@ -7,6 +7,15 @@ android {
     namespace = "com.example.neocalc"
     compileSdk = 34
 
+    signingConfigs {
+        create("release"){
+            keyAlias = "neoCalcApp"
+            keyPassword = "24neoCalcApp365."
+            storePassword = "24neoCalcApp365."
+            storeFile = file("\\neoCalc.jks")
+        }
+    }
+
     defaultConfig {
         applicationId = "com.example.neocalc"
         minSdk = 26
@@ -24,10 +33,12 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

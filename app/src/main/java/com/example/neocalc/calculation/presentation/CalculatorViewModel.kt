@@ -2,7 +2,11 @@ package com.example.neocalc.calculation.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.faendir.rhino_android.RhinoAndroidHelper
+import com.example.neocalc.calculation.data.repository.CalculateRepository
+import com.example.neocalc.calculation.domain.usecase.CalculateResultUseCase
+import com.example.neocalc.calculation.util.Resource
+import com.example.neocalc.calculation.util.canAddDecimal
+import com.example.neocalc.calculation.util.isLastCharOperator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -12,6 +16,7 @@ class CalculatorViewModel(
     private var applicationContext: Application
 ) : AndroidViewModel(applicationContext) {
 
+    private val repository = CalculateRepository()
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
     val uiState = _uiState.asStateFlow()
     private var context: Context? = null
@@ -96,22 +101,22 @@ class CalculatorViewModel(
             return
         }
 
-        input = input.replace("÷", "/")
-        input = input.replace("%", "/100")
-        input = input.replace("x", "*")
+        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
+        when (result) {
+            is Resource.Error -> _uiState.update {
+                it.copy(
+                    result = result.message,
+                    isError = true
+                )
+            }
 
-        val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
-        context = rhinoAndroidHelper.enterContext()
-        context?.optimizationLevel = -1
-        try {
-            val scriptable = context?.initStandardObjects()
-            val resultString =
-                context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
-            val resultDouble = resultString.toDoubleOrNull() ?: 0.0
-            val result = resultDouble.cleanDouble().toString()
-            _uiState.update { it.copy(input = result, isError = false, result = "") }
-        } catch (e: Exception) {
-            _uiState.update { it.copy(isError = true, result = "Format Error") }
+            is Resource.Success<*> -> _uiState.update {
+                it.copy(
+                    input = result.data as String,
+                    isError = false,
+                    result = ""
+                )
+            }
         }
     }
 
@@ -124,24 +129,16 @@ class CalculatorViewModel(
             return
         }
 
-        input = input.replace("÷", "/")
-        input = input.replace("%", "/100")
-        input = input.replace("x", "*")
-
-        val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
-        context = rhinoAndroidHelper.enterContext()
-        context?.optimizationLevel = -1
-
-        val result = try {
-            val scriptable = context?.initStandardObjects()
-            val resultString =
-                context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
-            val resultDouble = resultString.toDoubleOrNull() ?: 0.0
-            resultDouble.cleanDouble().toString()
-        } catch (e: Exception) {
-            ""
+        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
+        when (result) {
+            is Resource.Error -> _uiState.update { it.copy(result = "", isError = false) }
+            is Resource.Success<*> -> _uiState.update {
+                it.copy(
+                    result = result.data as String,
+                    isError = false
+                )
+            }
         }
-        _uiState.update { it.copy(result = result, isError = false) }
     }
 
     private fun clear(){
@@ -149,38 +146,6 @@ class CalculatorViewModel(
         _uiState.update { CalculatorScreenUiState() }
     }
 
-    private fun Double.cleanDouble(): Number{
-        if(this % 1 == 0.0){
-            // has no fractional part return int
-            return toInt()
-        }
-
-        return this
-    }
-
-    private fun String.isLastCharOperator(): Boolean {
-        if (isBlank()) return false
-
-        val lastChar = this.last().toString()
-        return (lastChar == CalculatorOperation.Subtract.symbol
-                || lastChar == CalculatorOperation.Add.symbol
-                || lastChar == CalculatorOperation.Divide.symbol
-                || lastChar == CalculatorOperation.Multiply.symbol)
-    }
-
-    private fun String.isLastCharDecimal(): Boolean {
-        if (isBlank()) return false
-        val lastChar = this.last().toString()
-
-        return lastChar == "."
-    }
-
-    private fun String.canAddDecimal(): Boolean {
-        if (isLastCharDecimal()) {
-            return false
-        }
-        return true
-    }
 
     companion object{
         private const val MAX_NUM_LENGTH = 8

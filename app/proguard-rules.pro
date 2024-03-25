@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# tells progaurd to not obfuscate Rhino library to make it work
+-keep class org.mozilla.javascript.** { *; }
