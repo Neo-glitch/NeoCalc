@@ -17,10 +17,8 @@ class CalculateRepository {
         // should move this to repository
         return try {
             val scriptable = context?.initStandardObjects()
-            val resultString =
+            val result =
                 context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
-            val resultDouble = resultString.toDoubleOrNull() ?: 0.0
-            val result = resultDouble.cleanDouble().toString()
             Resource.Success(result)
         } catch (e: Exception) {
             Resource.Error("Format Error")

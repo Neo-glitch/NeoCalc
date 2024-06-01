@@ -35,3 +35,10 @@ fun String.canAddDecimal(): Boolean {
     }
     return true
 }
+
+fun String?.containsCalculatorOperation() : Boolean{
+    val calculatorOperations  = listOf("+", "-", "x", "÷", "%")
+    return this?.let {text ->
+        calculatorOperations.any { operation -> text.contains(operation) }
+    } ?: false
+}

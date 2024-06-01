@@ -6,6 +6,7 @@ import com.neocalc.neocalc.calculation.data.repository.CalculateRepository
 import com.neocalc.neocalc.calculation.domain.usecase.CalculateResultUseCase
 import com.neocalc.neocalc.calculation.util.Resource
 import com.neocalc.neocalc.calculation.util.canAddDecimal
+import com.neocalc.neocalc.calculation.util.containsCalculatorOperation
 import com.neocalc.neocalc.calculation.util.isLastCharOperator
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,11 +34,12 @@ class CalculatorViewModel(
     }
 
     private fun enterNumber(number: Int) {
-        val state = uiState.value
         _uiState.update {
-            it.copy(input = state.input + number, result = "")
+            it.copy(input = uiState.value.input + number, result = "")
         }
-        performCalculationOnInputChange()
+
+        if(uiState.value.input.containsCalculatorOperation())
+            performCalculationOnInputChange()
     }
 
     private fun enterOperation(operatorEvent: CalculatorOperation) {

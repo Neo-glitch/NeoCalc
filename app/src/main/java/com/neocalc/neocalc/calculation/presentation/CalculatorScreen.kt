@@ -20,9 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.neocalc.neocalc.calculation.presentation.component.AutoResizedText
 import com.neocalc.neocalc.calculation.presentation.component.CalculatorButton
 import com.neocalc.neocalc.ui.theme.CyanBlue
 import com.neocalc.neocalc.ui.theme.ExtendedTheme
@@ -38,33 +40,33 @@ fun Calculator(
     val state = viewModel.uiState
     val uiState = state.collectAsState()
 
-
     Box(modifier = modifier) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
         ) {
-
-            Text(
-                text = uiState.value.input,
+            AutoResizedText(
+                text = uiState.value.input, minFontSize = 20.sp,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 6.dp),
+                maxLines = 1,
                 textAlign = TextAlign.End,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 15.dp, vertical = 4.dp),
-                fontWeight = FontWeight.Medium,
-                fontFamily = poppins,
-                fontSize = 45.sp,
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    fontFamily = poppins,
+                    fontSize = 45.sp
+                ),
                 color = if (uiState.value.isError)
                     MaterialTheme.colorScheme.error
                 else
-                    MaterialTheme.colorScheme.onSurface,
-                maxLines = 3
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
 
             Text(
                 text = uiState.value.result,
                 textAlign = TextAlign.End,
+                overflow = TextOverflow.Ellipsis,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 15.dp, vertical = 4.dp),
@@ -254,9 +256,9 @@ fun Calculator(
 
                 // last row
                 Row(
-                    modifier = Modifier.
-                    height(70.dp).
-                    fillMaxWidth(),
+                    modifier = Modifier
+                        .height(70.dp)
+                        .fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
                 ){
                     CalculatorButton(
