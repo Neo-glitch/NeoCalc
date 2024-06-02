@@ -47,7 +47,8 @@ fun CalculatorScreen(
                 .align(Alignment.BottomCenter),
         ) {
             AutoResizedText(
-                text = uiState.value.input, minFontSize = 20.sp,
+                text = uiState.value.input,
+                minFontSize = 30.sp,
                 modifier = Modifier.fillMaxWidth()
                     .padding(horizontal = 15.dp, vertical = 6.dp),
                 maxLines = 1,
@@ -55,7 +56,7 @@ fun CalculatorScreen(
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
                     fontFamily = poppins,
-                    fontSize = 45.sp
+                    fontSize = 50.sp
                 ),
                 color = if (uiState.value.isError)
                     MaterialTheme.colorScheme.error
@@ -72,7 +73,7 @@ fun CalculatorScreen(
                     .padding(horizontal = 15.dp, vertical = 4.dp),
                 fontWeight = FontWeight.Medium,
                 fontFamily = poppins,
-                fontSize = 30.sp,
+                fontSize = 40.sp,
                 color = if (uiState.value.isError)
                     MaterialTheme.colorScheme.error
                 else
