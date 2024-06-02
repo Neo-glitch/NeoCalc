@@ -13,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.neocalc.neocalc.calculation.presentation.Calculator
+import com.neocalc.neocalc.calculation.presentation.CalculatorScreen
 import com.neocalc.neocalc.calculation.presentation.CalculatorViewModel
 import com.neocalc.neocalc.ui.theme.NeoCalcTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -31,7 +31,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     val viewModel = viewModel<CalculatorViewModel>()
-                    Calculator(viewModel = viewModel, buttonSpacing = 8.dp)
+                    CalculatorScreen(viewModel = viewModel, buttonSpacing = 8.dp)
                 }
             }
         }

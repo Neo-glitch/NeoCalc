@@ -20,7 +20,6 @@ class CalculatorViewModel(
     private val repository = CalculateRepository()
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
     val uiState = _uiState.asStateFlow()
-    private var context: Context? = null
 
     fun onEvent(event: CalculatorEvent){
         when(event){
@@ -34,11 +33,18 @@ class CalculatorViewModel(
     }
 
     private fun enterNumber(number: Int) {
+        val updatedInput = if (uiState.value.isEqualsOppDone) {
+            _uiState.update { it.copy(isEqualsOppDone = false) }
+            ""
+        } else {
+            uiState.value.input
+        }.plus(number)
+
         _uiState.update {
-            it.copy(input = uiState.value.input + number, result = "")
+            it.copy(input = updatedInput, result = "")
         }
 
-        if(uiState.value.input.containsCalculatorOperation())
+        if(updatedInput.containsCalculatorOperation())
             performCalculationOnInputChange()
     }
 
@@ -51,7 +57,7 @@ class CalculatorViewModel(
             val substring = input.substring(0, input.length - 1)
             input = substring + operatorEvent.symbol
             _uiState.update {
-                it.copy(input = input)
+                it.copy(input = input, isEqualsOppDone = false)
             }
             performCalculationOnInputChange()
             return
@@ -60,25 +66,23 @@ class CalculatorViewModel(
         if(input.isBlank()){
             if(operatorEvent == CalculatorOperation.Add || operatorEvent == CalculatorOperation.Subtract){
                 input += operatorEvent.symbol
-                _uiState.update { it.copy(input = input) }
+                _uiState.update { it.copy(input = input, isEqualsOppDone = false) }
             }
             return
         }
 
         input += operatorEvent.symbol
         _uiState.update {
-            it.copy(input = input)
+            it.copy(input = input, isEqualsOppDone = false)
         }
         performCalculationOnInputChange()
     }
 
     private fun enterDecimal() {
-        val state = uiState.value
-        var firstNumber = state.input
-        if (firstNumber.canAddDecimal()) {
-            firstNumber += "."
-            _uiState.update { it.copy(input = firstNumber) }
-            performCalculationOnInputChange()
+        if (uiState.value.input.canAddDecimal()) {
+            _uiState.update { it.copy(input = uiState.value.input.plus(".")) }
+            if(uiState.value.input.containsCalculatorOperation())
+                performCalculationOnInputChange()
         }
     }
 
@@ -93,15 +97,14 @@ class CalculatorViewModel(
               performCalculationOnInputChange()
           }
       }
-
     }
 
     private fun calculate() {
         val state = uiState.value
         var input = state.input
-        if (input.isBlank()) {
-            return
-        }
+
+        if (input.isBlank()) return
+        if(!input.containsCalculatorOperation()) return
 
         val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
         when (result) {
@@ -116,7 +119,8 @@ class CalculatorViewModel(
                 it.copy(
                     input = result.data as String,
                     isError = false,
-                    result = ""
+                    result = "",
+                    isEqualsOppDone = true
                 )
             }
         }

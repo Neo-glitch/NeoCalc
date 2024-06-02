@@ -31,7 +31,7 @@ import com.neocalc.neocalc.ui.theme.ExtendedTheme
 import com.neocalc.neocalc.ui.theme.poppins
 
 @Composable
-fun Calculator(
+fun CalculatorScreen(
     viewModel: CalculatorViewModel,
     buttonSpacing: Dp = 15.dp,
     modifier: Modifier = Modifier
