@@ -102,9 +102,9 @@ class CalculatorViewModel(
     private fun calculate() {
         val state = uiState.value
         var input = state.input
-        if (input.isBlank()) {
-            return
-        }
+
+        if (input.isBlank()) return
+        if(!input.containsCalculatorOperation()) return
 
         val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
         when (result) {
