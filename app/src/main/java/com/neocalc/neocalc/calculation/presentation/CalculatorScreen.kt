@@ -1,30 +1,37 @@
 package com.neocalc.neocalc.calculation.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neocalc.neocalc.calculation.presentation.component.AutoResizedText
+import com.neocalc.neocalc.calculation.presentation.component.AutoSizeText
 import com.neocalc.neocalc.calculation.presentation.component.CalculatorButton
 import com.neocalc.neocalc.ui.theme.CyanBlue
 import com.neocalc.neocalc.ui.theme.ExtendedTheme
@@ -46,17 +53,23 @@ fun CalculatorScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
         ) {
-            AutoResizedText(
+
+            AutoSizeText(
                 text = uiState.value.input,
-                minFontSize = 30.sp,
-                modifier = Modifier.fillMaxWidth()
-                    .padding(horizontal = 15.dp, vertical = 6.dp),
                 maxLines = 1,
-                textAlign = TextAlign.End,
-                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                minTextSize = 30.sp,
+                maxTextSize = 50.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 15.dp, vertical = 6.dp),
+                alignment = Alignment.TopEnd,
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
                     fontFamily = poppins,
-                    fontSize = 50.sp
+                    lineHeightStyle = LineHeightStyle(
+                        alignment = LineHeightStyle.Alignment.Center,
+                        trim = LineHeightStyle.Trim.Both,
+                    )
                 ),
                 color = if (uiState.value.isError)
                     MaterialTheme.colorScheme.error
@@ -290,4 +303,9 @@ fun CalculatorScreen(
             }
         }
     }
+}
+
+@Composable
+fun CalculatorInputSection(){
+
 }

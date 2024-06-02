@@ -94,7 +94,8 @@ class CalculatorViewModel(
               _uiState.update {
                   it.copy(input = state.input.substring(0, input.length - 1))
               }
-              performCalculationOnInputChange()
+              if(uiState.value.input.containsCalculatorOperation())
+                  performCalculationOnInputChange()
           }
       }
     }
