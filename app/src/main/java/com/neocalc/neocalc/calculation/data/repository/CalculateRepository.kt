@@ -21,11 +21,9 @@ class CalculateRepository {
             val scriptable = context?.initStandardObjects()
             val resultString =
                 context?.evaluateString(scriptable, input, "javascript", 1, null).toString()
-//            val resultDouble = resultString.toDoubleOrNull() ?: 0.0
-//            val result = resultDouble.cleanDouble().toString()
             val result = BigDecimal(resultString)
             val cleanedResult = if(result.isIntegerValue()){
-                result.intValueExact().toString()
+                result.toBigInteger().toString()
             } else{
                 result.toString()
             }

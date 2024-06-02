@@ -42,4 +42,8 @@ fun String?.containsCalculatorOperation() : Boolean {
     } ?: false
 }
 
-fun BigDecimal.isIntegerValue() = this.stripTrailingZeros().scale() <= 0
+fun BigDecimal.isIntegerValue() : Boolean {
+    return (signum() == 0 || scale() <= 0 || stripTrailingZeros().scale() <= 0) &&
+            // ensures this value doesn't also contain exponential
+            !toString().contains("E")
+}
