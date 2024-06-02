@@ -1,6 +1,7 @@
 package com.neocalc.neocalc.calculation.util
 
 import com.neocalc.neocalc.calculation.presentation.CalculatorOperation
+import java.math.BigDecimal
 
 
 fun Double.cleanDouble(): Number{
@@ -22,23 +23,23 @@ fun String.isLastCharOperator(): Boolean {
             || lastChar == CalculatorOperation.Multiply.symbol)
 }
 
-fun String.isLastCharDecimal(): Boolean {
-    if (isBlank()) return false
-    val lastChar = this.last().toString()
-
-    return lastChar == "."
-}
 
 fun String.canAddDecimal(): Boolean {
-    if (isLastCharDecimal()) {
-        return false
-    }
-    return true
+    // splits input string using operands and check is last input has decimal already
+    // when it doesn't then decimal can be added, else false
+    val operationSplitRegex = Regex("[+\\-x÷%]")
+    val singleInputParts = this.split(operationSplitRegex)
+
+    singleInputParts.takeIf { it.isNotEmpty() }?.let {
+        return !it.last().contains(".")
+    }  ?: return false
 }
 
-fun String?.containsCalculatorOperation() : Boolean{
+fun String?.containsCalculatorOperation() : Boolean {
     val calculatorOperations  = listOf("+", "-", "x", "÷", "%")
     return this?.let {text ->
         calculatorOperations.any { operation -> text.contains(operation) }
     } ?: false
 }
+
+fun BigDecimal.isIntegerValue() = this.stripTrailingZeros().scale() <= 0
