@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.neocalc.neocalc.calculation.presentation.CalculatorScreen
 import com.neocalc.neocalc.calculation.presentation.CalculatorViewModel
 import com.neocalc.neocalc.ui.theme.NeoCalcTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.neocalc.neocalc.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,13 +27,14 @@ class MainActivity : ComponentActivity() {
         setContent {
             NeoCalcTheme {
                 // A surface container using the 'background' color from the theme
-
                 SetBarColor(color = MaterialTheme.colorScheme.background)
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                 ) {
-                    val viewModel = viewModel<CalculatorViewModel>()
-                    CalculatorScreen(viewModel = viewModel, buttonSpacing = 8.dp)
+//                    val viewModel = viewModel<CalculatorViewModel>()
+//                    CalculatorScreen(viewModel = viewModel, buttonSpacing = 8.dp)
+                    val navController = rememberNavController()
+                    AppNavGraph(navHostController = navController)
                 }
             }
         }

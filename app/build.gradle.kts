@@ -4,6 +4,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    alias(libs.plugins.kspAndroid)
 }
 
 val keyStorePropertiesFile = rootProject.file("keystore.properties")
@@ -79,6 +80,17 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.accompanist.system.ui.controller)
+
+    // for calculations on strings input
+    implementation(libs.rhino.android)
+
+    implementation(libs.room.runtime)
+    implementation(libs.room.coroutine)
+    implementation(libs.room.paging)
+    annotationProcessor(libs.room.annotation.processor)
+    ksp(libs.room.annotation.processor)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -86,7 +98,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.27.0")
-    // for calculations on strings input
-    implementation("com.faendir.rhino:rhino-android:1.6.0")
 }

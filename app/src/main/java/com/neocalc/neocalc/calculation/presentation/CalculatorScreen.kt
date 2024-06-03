@@ -1,6 +1,8 @@
 package com.neocalc.neocalc.calculation.presentation
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,8 +12,13 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -19,13 +26,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.neocalc.neocalc.R
 import com.neocalc.neocalc.calculation.presentation.component.AutoSizeText
 import com.neocalc.neocalc.calculation.presentation.component.CalculatorButton
 import com.neocalc.neocalc.ui.theme.CyanBlue
@@ -34,15 +45,23 @@ import com.neocalc.neocalc.ui.theme.poppins
 
 @Composable
 fun CalculatorScreen(
+    modifier: Modifier = Modifier,
     viewModel: CalculatorViewModel,
     buttonSpacing: Dp = 15.dp,
-    modifier: Modifier = Modifier
+    navigateToHistory: () -> Unit = {}
 ) {
 
     val state = viewModel.uiState
     val uiState = state.collectAsState()
 
     Box(modifier = modifier) {
+        AppBarSection(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            navigateToHistory = navigateToHistory
+        )
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,6 +89,42 @@ fun CalculatorScreen(
     }
 }
 
+@Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+fun AppBarSection(modifier: Modifier = Modifier, navigateToHistory: () -> Unit = {}) {
+    Surface {
+        Row(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val uiModeIcon =
+                if (isSystemInDarkTheme()) R.drawable.ic_calculator_light_mode else R.drawable.ic_calculator_dark_mode
+
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = navigateToHistory) {
+                Icon(
+                    modifier = Modifier.size(24.dp),
+                    painter = painterResource(id = R.drawable.ic_calculator_history),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            IconButton(onClick = { }) {
+                Icon(
+                    modifier = Modifier.size(26.dp),
+                    painter = painterResource(id = uiModeIcon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+
+        }
+    }
+}
+
 @Composable
 fun ResultSection(
     uiState : State<CalculatorScreenUiState>
@@ -77,15 +132,14 @@ fun ResultSection(
     AutoSizeText(
         text = uiState.value.input,
         maxLines = 1,
-        minTextSize = 30.sp,
-        maxTextSize = 50.sp,
+        minTextSize = dimensionResource(id = R.dimen.min_input_text_size).value.sp,
+        maxTextSize = dimensionResource(id = R.dimen.input_text_size).value.sp,
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 15.dp, vertical = 6.dp),
         alignment = Alignment.TopEnd,
-        style = MaterialTheme.typography.bodyMedium.copy(
+        style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.Medium,
-            fontFamily = poppins,
             lineHeightStyle = LineHeightStyle(
                 alignment = LineHeightStyle.Alignment.Center,
                 trim = LineHeightStyle.Trim.Both,
@@ -94,7 +148,7 @@ fun ResultSection(
         color = if (uiState.value.isError)
             MaterialTheme.colorScheme.error
         else
-            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            MaterialTheme.colorScheme.onSurface
     )
 
     Text(
@@ -106,7 +160,7 @@ fun ResultSection(
             .padding(horizontal = 15.dp, vertical = 4.dp),
         fontWeight = FontWeight.Medium,
         fontFamily = poppins,
-        fontSize = 40.sp,
+        fontSize = dimensionResource(id = R.dimen.result_text_size).value.sp,
         color = if (uiState.value.isError)
             MaterialTheme.colorScheme.error
         else
