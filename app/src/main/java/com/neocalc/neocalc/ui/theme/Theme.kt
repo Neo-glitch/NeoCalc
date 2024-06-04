@@ -70,7 +70,7 @@ fun NeoCalcTheme(
         }
     }
 
-    val extendedColors = GetExtendedColors(isSystemInDarkTheme())
+    val extendedColors = getExtendedColors(isSystemInDarkTheme())
     CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
         MaterialTheme(
             colorScheme = colorScheme,
@@ -82,7 +82,7 @@ fun NeoCalcTheme(
 
 
 @Composable
-fun GetExtendedColors(darkTheme: Boolean = isSystemInDarkTheme()): ExtendedColors {
+fun getExtendedColors(darkTheme: Boolean = isSystemInDarkTheme()): ExtendedColors {
     return if (darkTheme)
         ExtendedColors(
             MediumGray,

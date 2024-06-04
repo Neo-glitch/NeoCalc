@@ -18,8 +18,10 @@ import com.neocalc.neocalc.calculation.presentation.CalculatorScreen
 import com.neocalc.neocalc.calculation.presentation.CalculatorViewModel
 import com.neocalc.neocalc.ui.theme.NeoCalcTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.neocalc.neocalc.navigation.AppNavGraph
+import com.neocalc.neocalc.core.navigation.AppNavGraph
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

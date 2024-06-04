@@ -2,22 +2,28 @@ package com.neocalc.neocalc.calculation.presentation
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import com.neocalc.neocalc.calculation.data.repository.CalculateRepository
-import com.neocalc.neocalc.calculation.domain.usecase.CalculateResultUseCase
-import com.neocalc.neocalc.calculation.util.Resource
-import com.neocalc.neocalc.calculation.util.canAddDecimal
-import com.neocalc.neocalc.calculation.util.containsCalculatorOperation
-import com.neocalc.neocalc.calculation.util.isLastCharOperator
+import androidx.lifecycle.ViewModel
+import com.neocalc.neocalc.calculation.data.repository.CalculationRepositoryImpl
+import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository
+import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
+import com.neocalc.neocalc.core.data.util.Resource
+import com.neocalc.neocalc.core.util.canAddDecimal
+import com.neocalc.neocalc.core.util.containsCalculatorOperation
+import com.neocalc.neocalc.core.util.isLastCharOperator
+import com.neocalc.neocalc.history.domain.use_cases.UpsertCalculationHistoryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.mozilla.javascript.Context
+import javax.inject.Inject
 
-class CalculatorViewModel(
-    private var applicationContext: Application
-) : AndroidViewModel(applicationContext) {
+@HiltViewModel
+class CalculatorViewModel @Inject constructor(
+    private val calculateResultUseCase: CalculateResultUseCase,
+    private val upsertCalculationHistoryUseCase: UpsertCalculationHistoryUseCase
+) : ViewModel() {
 
-    private val repository = CalculateRepository()
+
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -107,7 +113,7 @@ class CalculatorViewModel(
         if (input.isBlank()) return
         if(!input.containsCalculatorOperation()) return
 
-        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
+        val result = calculateResultUseCase(input)
         when (result) {
             is Resource.Error -> _uiState.update {
                 it.copy(
@@ -136,7 +142,7 @@ class CalculatorViewModel(
             return
         }
 
-        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
+        val result = calculateResultUseCase(input)
         when (result) {
             is Resource.Error -> _uiState.update { it.copy(result = "", isError = false) }
             is Resource.Success<*> -> _uiState.update {

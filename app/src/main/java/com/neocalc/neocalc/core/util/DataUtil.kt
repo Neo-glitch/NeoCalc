@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.calculation.util
+package com.neocalc.neocalc.core.util
 
 import com.neocalc.neocalc.calculation.presentation.CalculatorOperation
 import java.math.BigDecimal

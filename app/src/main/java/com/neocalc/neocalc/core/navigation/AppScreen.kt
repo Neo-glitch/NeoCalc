@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.navigation
+package com.neocalc.neocalc.core.navigation
 
 sealed class AppScreen (
 	val route: String,

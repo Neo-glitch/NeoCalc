@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.calculation.util
+package com.neocalc.neocalc.core.util
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size

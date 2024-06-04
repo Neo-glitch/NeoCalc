@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.neocalc.neocalc.R
 import com.neocalc.neocalc.history.domain.entities.HistoryType
@@ -44,7 +45,7 @@ import com.neocalc.neocalc.history.domain.entities.HistoryType
 fun HistoryScreen(
 	pop: () -> Unit = {}
 ) {
-	val viewModel = viewModel<HistoryViewModel>()
+	val viewModel = hiltViewModel<HistoryViewModel>()
 
 	Scaffold(
 		topBar = { AppBarSection(Modifier, pop = pop) }
