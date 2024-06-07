@@ -3,6 +3,7 @@ package com.neocalc.neocalc.calculation.di
 import android.app.Application
 import com.faendir.rhino_android.RhinoAndroidHelper
 import com.neocalc.neocalc.calculation.data.repository.CalculationRepositoryImpl
+import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
 import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository
 import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
 import dagger.Module

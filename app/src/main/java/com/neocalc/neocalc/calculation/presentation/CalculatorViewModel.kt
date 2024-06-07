@@ -1,15 +1,12 @@
 package com.neocalc.neocalc.calculation.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
-import com.neocalc.neocalc.calculation.data.repository.CalculationRepositoryImpl
-import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository
+import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
 import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.validation.CalculationInputValidator
 import com.neocalc.neocalc.core.data.util.Resource
 import com.neocalc.neocalc.core.util.canAddDecimal
-import com.neocalc.neocalc.core.util.containsCalculatorOperation
-import com.neocalc.neocalc.core.util.isLastCharOperator
+import com.neocalc.neocalc.core.util.isLastCharBasicOperator
 import com.neocalc.neocalc.history.domain.use_cases.UpsertCalculationHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,15 +47,14 @@ class CalculatorViewModel @Inject constructor(
             it.copy(input = updatedInput, result = "")
         }
 
-        if(updatedInput.containsCalculatorOperation())
-            performCalculationOnInputChange()
+        performCalculationOnInputChange()
     }
 
     private fun enterOperation(operatorEvent: CalculatorOperation) {
         val state = uiState.value
         var input = state.input
 
-        if (state.input.isLastCharOperator()) {
+        if (state.input.isLastCharBasicOperator()) {
             // last character is operator, replace it
             val substring = input.substring(0, input.length - 1)
             input = substring + operatorEvent.symbol
@@ -87,8 +83,7 @@ class CalculatorViewModel @Inject constructor(
     private fun enterDecimal() {
         if (uiState.value.input.canAddDecimal()) {
             _uiState.update { it.copy(input = uiState.value.input.plus(".")) }
-            if(uiState.value.input.containsCalculatorOperation())
-                performCalculationOnInputChange()
+            performCalculationOnInputChange()
         }
     }
 
@@ -100,21 +95,23 @@ class CalculatorViewModel @Inject constructor(
               _uiState.update {
                   it.copy(input = state.input.substring(0, input.length - 1))
               }
-              if(uiState.value.input.containsCalculatorOperation())
-                  performCalculationOnInputChange()
+              performCalculationOnInputChange()
           }
       }
     }
 
     private fun calculate() {
         val state = uiState.value
-        var input = state.input
+        val input = state.input
 
-        if (input.isBlank()) return
-        if(!input.containsCalculatorOperation()) return
+        // todo move this to a validator
+//        if (input.isBlank()) return
+//        if(!input.containsCalculatorOperation()) return
 
-        val result = calculateResultUseCase(input)
-        when (result) {
+        if(!CalculationInputValidator.isCalculationInputValid(input)) return
+        val formattedInput = CalculationInputFormatter.formatInput(input)
+
+        when (val result = calculateResultUseCase(formattedInput)) {
             is Resource.Error -> _uiState.update {
                 it.copy(
                     result = result.message,
@@ -134,16 +131,19 @@ class CalculatorViewModel @Inject constructor(
     }
 
     private fun performCalculationOnInputChange(){
-        val state = uiState.value
-        var input = state.input
+        val input = uiState.value.input
 
-        if (input.isBlank()) {
-            _uiState.update { it.copy(result = "") }
-            return
-        }
+//        if (input.isBlank()) {
+//            _uiState.update { it.copy(result = "") }
+//            return
+//        }
+//
+//        if (!input.containsCalculatorOperation()) return
 
-        val result = calculateResultUseCase(input)
-        when (result) {
+        if(!CalculationInputValidator.isCalculationInputValid(input)) return
+        val formattedInput = CalculationInputFormatter.formatInput(input)
+
+        when (val result = calculateResultUseCase(formattedInput)) {
             is Resource.Error -> _uiState.update { it.copy(result = "", isError = false) }
             is Resource.Success<*> -> _uiState.update {
                 it.copy(

@@ -13,8 +13,6 @@ class CalculationRepositoryImpl(
 ) : CalculationRepository {
 
     override fun calculate(input: String): Resource {
-//        val context: Context?
-//        val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
         val context = rhino.enterContext()
         context.optimizationLevel = -1
 
