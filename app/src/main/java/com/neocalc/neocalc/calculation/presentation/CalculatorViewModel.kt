@@ -1,23 +1,30 @@
 package com.neocalc.neocalc.calculation.presentation
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
-import com.neocalc.neocalc.calculation.data.repository.CalculateRepository
-import com.neocalc.neocalc.calculation.domain.usecase.CalculateResultUseCase
-import com.neocalc.neocalc.calculation.util.Resource
-import com.neocalc.neocalc.calculation.util.canAddDecimal
-import com.neocalc.neocalc.calculation.util.containsCalculatorOperation
-import com.neocalc.neocalc.calculation.util.isLastCharOperator
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
+import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.validation.CalculationInputValidator
+import com.neocalc.neocalc.core.data.util.Resource
+import com.neocalc.neocalc.core.util.canAddDecimal
+import com.neocalc.neocalc.core.util.isLastCharBasicOperator
+import com.neocalc.neocalc.history.domain.entities.CalculationHistory
+import com.neocalc.neocalc.history.domain.use_cases.UpsertCalculationHistoryUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.mozilla.javascript.Context
+import kotlinx.coroutines.launch
+import java.util.Date
+import javax.inject.Inject
 
-class CalculatorViewModel(
-    private var applicationContext: Application
-) : AndroidViewModel(applicationContext) {
+@HiltViewModel
+class CalculatorViewModel @Inject constructor(
+    private val calculateResultUseCase: CalculateResultUseCase,
+    private val upsertCalculationHistoryUseCase: UpsertCalculationHistoryUseCase
+) : ViewModel() {
 
-    private val repository = CalculateRepository()
+
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -44,15 +51,14 @@ class CalculatorViewModel(
             it.copy(input = updatedInput, result = "")
         }
 
-        if(updatedInput.containsCalculatorOperation())
-            performCalculationOnInputChange()
+        performCalculationOnInputChange()
     }
 
     private fun enterOperation(operatorEvent: CalculatorOperation) {
         val state = uiState.value
         var input = state.input
 
-        if (state.input.isLastCharOperator()) {
+        if (state.input.isLastCharBasicOperator()) {
             // last character is operator, replace it
             val substring = input.substring(0, input.length - 1)
             input = substring + operatorEvent.symbol
@@ -81,34 +87,31 @@ class CalculatorViewModel(
     private fun enterDecimal() {
         if (uiState.value.input.canAddDecimal()) {
             _uiState.update { it.copy(input = uiState.value.input.plus(".")) }
-            if(uiState.value.input.containsCalculatorOperation())
-                performCalculationOnInputChange()
+            performCalculationOnInputChange()
         }
     }
 
     private fun delete() {
         val state = uiState.value
-      when{
-          state.input.isNotBlank() -> {
+        when{
+            state.input.isNotBlank() -> {
               val input = uiState.value.input
               _uiState.update {
                   it.copy(input = state.input.substring(0, input.length - 1))
               }
-              if(uiState.value.input.containsCalculatorOperation())
-                  performCalculationOnInputChange()
-          }
-      }
+              performCalculationOnInputChange()
+            }
+        }
     }
 
     private fun calculate() {
         val state = uiState.value
-        var input = state.input
+        val input = state.input
 
-        if (input.isBlank()) return
-        if(!input.containsCalculatorOperation()) return
+        if(!CalculationInputValidator.isCalculationInputValid(input)) return
+        val formattedInput = CalculationInputFormatter.formatInput(input)
 
-        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
-        when (result) {
+        when (val result = calculateResultUseCase(formattedInput)) {
             is Resource.Error -> _uiState.update {
                 it.copy(
                     result = result.message,
@@ -116,35 +119,52 @@ class CalculatorViewModel(
                 )
             }
 
-            is Resource.Success<*> -> _uiState.update {
-                it.copy(
-                    input = result.data as String,
-                    isError = false,
-                    result = "",
-                    isEqualsOppDone = true
+            is Resource.Success<*> -> {
+                saveOperationToHistory(
+                    input, result.data as String
                 )
+
+                _uiState.update {
+                    it.copy(
+                        input = result.data as String,
+                        isError = false,
+                        result = "",
+                        isEqualsOppDone = true
+                    )
+                }
             }
         }
     }
 
     private fun performCalculationOnInputChange(){
-        val state = uiState.value
-        var input = state.input
+        val input = uiState.value.input
 
-        if (input.isBlank()) {
-            _uiState.update { it.copy(result = "") }
-            return
-        }
+        if(!CalculationInputValidator.isCalculationInputValid(input)) return
+        val formattedInput = CalculationInputFormatter.formatInput(input)
 
-        val result = CalculateResultUseCase(repository).invoke(applicationContext, input)
-        when (result) {
+        when (val result = calculateResultUseCase(formattedInput)) {
             is Resource.Error -> _uiState.update { it.copy(result = "", isError = false) }
-            is Resource.Success<*> -> _uiState.update {
-                it.copy(
-                    result = result.data as String,
-                    isError = false
-                )
+            is Resource.Success<*> -> {
+                _uiState.update {
+                    it.copy(
+                        result = result.data as String,
+                        isError = false
+                    )
+                }
             }
+        }
+    }
+
+    private fun saveOperationToHistory (
+        input: String, result: String
+    ) {
+        val date = Date(System.currentTimeMillis())
+        val history = CalculationHistory(
+            null, input, result, date
+        )
+
+        viewModelScope.launch {
+            upsertCalculationHistoryUseCase(history)
         }
     }
 

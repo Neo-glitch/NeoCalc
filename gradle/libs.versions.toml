@@ -14,6 +14,11 @@ systemUiController = "0.27.0"
 rhino = "1.6.0"
 room = "2.6.1"
 ksp = "1.9.21-1.0.15"
+hilt = "2.48"
+org-jetbrains-kotlin-android = "1.8.0"
+hilt-navigation= "1.0.0"
+paging = "3.1.1"
+pagingCompose = "1.0.0-alpha16"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,9 +43,16 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-annotation-processor = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-coroutine = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt"}
+hilt-annotation-processor = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
+hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation" }
+paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kspAndroid = {id = "com.google.devtools.ksp", version.ref = "ksp"}
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
+org-jetbrains-kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "org-jetbrains-kotlin-android" }
 

@@ -27,6 +27,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -35,22 +39,44 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.neocalc.neocalc.R
 import com.neocalc.neocalc.history.domain.entities.HistoryType
 
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun HistoryScreen(
+	viewModel : HistoryViewModel = hiltViewModel<HistoryViewModel>(),
 	pop: () -> Unit = {}
 ) {
-	val viewModel = viewModel<HistoryViewModel>()
+	val state = viewModel.uiState.collectAsState()
+
+	HistoryScreenContent(
+		state  = state,
+		onPop = pop,
+		onEvent = viewModel::onEvent
+	)
+}
+
+@Composable
+fun HistoryScreenContent(
+	state: State<CalculationHistoryUiState> = mutableStateOf(CalculationHistoryUiState()),
+	onPop: () -> Unit = {},
+	onEvent: (CalculationHistoryEvent) -> Unit = {}
+){
+	LaunchedEffect(key1 = true) {
+		onEvent(CalculationHistoryEvent.Fetch)
+	}
 
 	Scaffold(
-		topBar = { AppBarSection(Modifier, pop = pop) }
+		topBar = {
+			AppBarSection(
+				Modifier,
+				onClear = { onEvent(CalculationHistoryEvent.Clear) },
+				pop = onPop
+			)
+		}
 	) { paddingValues ->
-
-		val itemsList = viewModel.getHistoryList()
 		LazyColumn(
 			modifier = Modifier
 				.padding(paddingValues = paddingValues)
@@ -58,16 +84,16 @@ fun HistoryScreen(
 				.fillMaxSize(1f),
 			verticalArrangement = Arrangement.spacedBy(20.dp)
 		) {
-			itemsIndexed(itemsList) { index, item ->
+			itemsIndexed(state.value.history) { index, item ->
 				when (item.type) {
-					HistoryType.date -> {
+					HistoryType.Date -> {
 						if (index != 0) {
 							this@LazyColumn.itemDivider(Modifier, Color.DarkGray, 2.dp)
 						}
 						DateItem(date = item.date ?: "")
 					}
 
-					HistoryType.history -> {
+					HistoryType.History -> {
 						HistoryItem(
 							calculatorOperation = item.history?.calculation ?: "",
 							result = item.history?.result ?: ""

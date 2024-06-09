@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.calculation.util
+package com.neocalc.neocalc.core.util
 
 import com.neocalc.neocalc.calculation.presentation.CalculatorOperation
 import java.math.BigDecimal
@@ -13,7 +13,7 @@ fun Double.cleanDouble(): Number{
     return this
 }
 
-fun String.isLastCharOperator(): Boolean {
+fun String.isLastCharBasicOperator(): Boolean {
     if (isBlank()) return false
 
     val lastChar = this.last().toString()
@@ -23,19 +23,38 @@ fun String.isLastCharOperator(): Boolean {
             || lastChar == CalculatorOperation.Multiply.symbol)
 }
 
+fun String.isPenultimateCharPercent(): Boolean {
+    if (this.length > 1) {
+        val penultimateChar = this[this.length - 2].toString()
+        return penultimateChar == CalculatorOperation.Percent.symbol
+    }
+    return false
+}
+
+
+/**
+ * splits input string using operators
+ * e.g Input: "87%.2%5" -> Output: [87, .2, 5]
+ * e.g Input: "87+" -> Output: [87]
+ * e.g Input: "87%+.2%5" -> Output: [87, , .2, 5]
+ */
+fun String.splitByCalculationOperators() : List<String> {
+    val operationSplitRegex = Regex("[+\\-x÷%]")
+    return split(operationSplitRegex)
+}
+
 
 fun String.canAddDecimal(): Boolean {
     // splits input string using operands and check is last input has decimal already
     // when it doesn't then decimal can be added, else false
-    val operationSplitRegex = Regex("[+\\-x÷%]")
-    val singleInputParts = this.split(operationSplitRegex)
+    val singleInputParts = splitByCalculationOperators()
 
     singleInputParts.takeIf { it.isNotEmpty() }?.let {
         return !it.last().contains(".")
     }  ?: return false
 }
 
-fun String?.containsCalculatorOperation() : Boolean {
+fun String?.containsCalculatorOperator() : Boolean {
     val calculatorOperations  = listOf("+", "-", "x", "÷", "%")
     return this?.let {text ->
         calculatorOperations.any { operation -> text.contains(operation) }

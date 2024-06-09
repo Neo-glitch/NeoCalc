@@ -1,20 +1,20 @@
 package com.neocalc.neocalc.calculation.data.repository
 
 import android.app.Application
-import com.neocalc.neocalc.calculation.util.Resource
-import com.neocalc.neocalc.calculation.util.cleanDouble
+import com.neocalc.neocalc.core.data.util.Resource
 import com.faendir.rhino_android.RhinoAndroidHelper
-import com.neocalc.neocalc.calculation.util.isIntegerValue
+import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository
+import com.neocalc.neocalc.core.util.isIntegerValue
 import org.mozilla.javascript.Context
 import java.math.BigDecimal
 
-class CalculateRepository {
+class CalculationRepositoryImpl(
+    private val rhino: RhinoAndroidHelper
+) : CalculationRepository {
 
-    fun calculate(applicationContext: Application, input: String): Resource{
-        val context: Context?
-        val rhinoAndroidHelper = RhinoAndroidHelper(applicationContext)
-        context = rhinoAndroidHelper.enterContext()
-        context?.optimizationLevel = -1
+    override fun calculate(input: String): Resource {
+        val context = rhino.enterContext()
+        context.optimizationLevel = -1
 
         // should move this to repository
         return try {

@@ -1,6 +1,7 @@
-package com.neocalc.neocalc.navigation
+package com.neocalc.neocalc.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -19,7 +20,7 @@ fun AppNavGraph(navHostController: NavHostController) {
 	) {
 
 		composable(route = AppScreen.Home.route){
-			val viewModel = viewModel<CalculatorViewModel>()
+			val viewModel = hiltViewModel<CalculatorViewModel>()
 			CalculatorScreen(viewModel = viewModel) {
 				navHostController.navigate(AppScreen.History.route)
 			}

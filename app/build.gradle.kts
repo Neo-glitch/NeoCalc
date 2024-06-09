@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.kspAndroid)
+    alias(libs.plugins.hilt)
+//    alias(libs.plugins.org.jetbrains.kotlin.kapt)
 }
 
 val keyStorePropertiesFile = rootProject.file("keystore.properties")
@@ -91,6 +93,14 @@ dependencies {
     implementation(libs.room.paging)
     annotationProcessor(libs.room.annotation.processor)
     ksp(libs.room.annotation.processor)
+    implementation(libs.hilt)
+    ksp(libs.hilt.annotation.processor)
+    implementation(libs.hilt.navigation)
+
+    // paging 3
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,3 +109,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+//kapt {
+//    correctErrorTypes = true
+//}

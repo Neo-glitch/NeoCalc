@@ -17,7 +17,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,9 +44,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import com.neocalc.neocalc.calculation.presentation.component.SuggestedFontSizesStatus.Companion.rememberSuggestedFontSizesStatus
-import com.neocalc.neocalc.calculation.util.roundToPx
-import com.neocalc.neocalc.calculation.util.toIntSize
-import com.neocalc.neocalc.calculation.util.toSp
+import com.neocalc.neocalc.core.util.roundToPx
+import com.neocalc.neocalc.core.util.toIntSize
+import com.neocalc.neocalc.core.util.toSp
 import kotlin.math.min
 
 
