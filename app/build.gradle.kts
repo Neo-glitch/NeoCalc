@@ -97,6 +97,10 @@ dependencies {
     ksp(libs.hilt.annotation.processor)
     implementation(libs.hilt.navigation)
 
+    // paging 3
+    implementation(libs.paging.runtime)
+    implementation(libs.paging.compose)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

@@ -27,7 +27,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -43,25 +46,37 @@ import com.neocalc.neocalc.history.domain.entities.HistoryType
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun HistoryScreen(
+	viewModel : HistoryViewModel = hiltViewModel<HistoryViewModel>(),
 	pop: () -> Unit = {}
 ) {
-	val viewModel = hiltViewModel<HistoryViewModel>()
+	val state = viewModel.uiState.collectAsState()
+
+	HistoryScreenContent(
+		state  = state,
+		onPop = pop,
+		onEvent = viewModel::onEvent
+	)
+}
+
+@Composable
+fun HistoryScreenContent(
+	state: State<CalculationHistoryUiState> = mutableStateOf(CalculationHistoryUiState()),
+	onPop: () -> Unit = {},
+	onEvent: (CalculationHistoryEvent) -> Unit = {}
+){
+	LaunchedEffect(key1 = true) {
+		onEvent(CalculationHistoryEvent.Fetch)
+	}
 
 	Scaffold(
 		topBar = {
 			AppBarSection(
 				Modifier,
-				onClear = { viewModel.onEvent(CalculationHistoryEvent.Clear) },
-				pop = pop
+				onClear = { onEvent(CalculationHistoryEvent.Clear) },
+				pop = onPop
 			)
 		}
 	) { paddingValues ->
-		val state = viewModel.uiState.collectAsState()
-
-		LaunchedEffect(key1 = true) {
-			viewModel.onEvent(CalculationHistoryEvent.Fetch)
-		}
-
 		LazyColumn(
 			modifier = Modifier
 				.padding(paddingValues = paddingValues)
