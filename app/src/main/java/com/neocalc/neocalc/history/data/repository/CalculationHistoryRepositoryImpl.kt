@@ -2,6 +2,7 @@ package com.neocalc.neocalc.history.data.repository
 
 import com.neocalc.neocalc.core.data.util.Resource
 import com.neocalc.neocalc.history.data.local.CalculatorHistoryDatabase
+import com.neocalc.neocalc.history.data.mapper.toEntity
 import com.neocalc.neocalc.history.data.model.CalculationHistoryModel
 import com.neocalc.neocalc.history.domain.repository.CalculationHistoryRepository
 
@@ -17,7 +18,8 @@ class CalculationHistoryRepositoryImpl(
 
 	override suspend fun getCalculationHistory(): Resource {
 		return try {
-			Resource.Success(historyDao.getCalculationHistory())
+			val history = historyDao.getCalculationHistory().map{ it.toEntity() }
+			Resource.Success(history)
 		}catch (e: Exception){
 			Resource.Error(e.localizedMessage ?: "Error Fetching History")
 		}

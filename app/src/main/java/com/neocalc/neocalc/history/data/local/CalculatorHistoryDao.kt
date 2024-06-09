@@ -13,7 +13,7 @@ interface CalculatorHistoryDao {
 	@Upsert
 	suspend fun upsertCalculationHistory(history: CalculationHistoryModel)
 
-	@Query("SELECT * FROM ${Constants.CALCULATION_HISTORY_TABLE} order by createdAt desc")
+	@Query("SELECT * FROM ${Constants.CALCULATION_HISTORY_TABLE} order by created_at desc")
 	suspend fun getCalculationHistory(): List<CalculationHistoryModel>
 
 	@Query("DELETE FROM ${Constants.CALCULATION_HISTORY_TABLE}")

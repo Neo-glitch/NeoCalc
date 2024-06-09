@@ -9,6 +9,6 @@ class ClearCalculationHistoryUseCase(
 ) {
 
 	suspend operator fun invoke() {
-
+		calculationHistoryRepository.clearCalculationHistory()
 	}
 }

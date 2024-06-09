@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -36,7 +37,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.neocalc.neocalc.R
 import com.neocalc.neocalc.history.domain.entities.HistoryType
 
@@ -48,10 +48,20 @@ fun HistoryScreen(
 	val viewModel = hiltViewModel<HistoryViewModel>()
 
 	Scaffold(
-		topBar = { AppBarSection(Modifier, pop = pop) }
+		topBar = {
+			AppBarSection(
+				Modifier,
+				onClear = { viewModel.onEvent(CalculationHistoryEvent.Clear) },
+				pop = pop
+			)
+		}
 	) { paddingValues ->
+		val state = viewModel.uiState.collectAsState()
 
-		val itemsList = viewModel.getHistoryList()
+		LaunchedEffect(key1 = true) {
+			viewModel.onEvent(CalculationHistoryEvent.Fetch)
+		}
+
 		LazyColumn(
 			modifier = Modifier
 				.padding(paddingValues = paddingValues)
@@ -59,16 +69,16 @@ fun HistoryScreen(
 				.fillMaxSize(1f),
 			verticalArrangement = Arrangement.spacedBy(20.dp)
 		) {
-			itemsIndexed(itemsList) { index, item ->
+			itemsIndexed(state.value.history) { index, item ->
 				when (item.type) {
-					HistoryType.date -> {
+					HistoryType.Date -> {
 						if (index != 0) {
 							this@LazyColumn.itemDivider(Modifier, Color.DarkGray, 2.dp)
 						}
 						DateItem(date = item.date ?: "")
 					}
 
-					HistoryType.history -> {
+					HistoryType.History -> {
 						HistoryItem(
 							calculatorOperation = item.history?.calculation ?: "",
 							result = item.history?.result ?: ""
