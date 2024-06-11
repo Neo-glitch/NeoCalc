@@ -8,6 +8,7 @@ import com.neocalc.neocalc.history.data.repository.CalculationHistoryRepositoryI
 import com.neocalc.neocalc.history.domain.repository.CalculationHistoryRepository
 import com.neocalc.neocalc.history.domain.use_cases.ClearCalculationHistoryUseCase
 import com.neocalc.neocalc.history.domain.use_cases.GetCalculationHistoryUseCase
+import com.neocalc.neocalc.history.domain.use_cases.GetItemCountUseCase
 import com.neocalc.neocalc.history.domain.use_cases.UpsertCalculationHistoryUseCase
 import dagger.Module
 import dagger.Provides
@@ -51,6 +52,10 @@ object HistoryModule {
 	@Singleton
 	fun provideClearHistoryUseCase(repository: CalculationHistoryRepository) =
 		ClearCalculationHistoryUseCase(repository)
+
+	@Provides
+	@Singleton
+	fun provideGetItemCountUseCase(repository: CalculationHistoryRepository) = GetItemCountUseCase(repository)
 
 
 

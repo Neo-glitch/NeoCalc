@@ -3,6 +3,7 @@ package com.neocalc.neocalc.core.util
 
 import android.text.format.DateUtils
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -30,7 +31,7 @@ object DateUtilities {
 		return try{
 			if(isToday(time)){
 				"Today"
-			} else if(isYesterday(time)) {
+			} else if(isYesterdaySecond(time)) {
 				"Yesterday"
 			} else {
 				this.toDateString(pattern)
@@ -46,7 +47,6 @@ object DateUtilities {
 			val formatter = SimpleDateFormat(pattern.format, Locale.getDefault())
 			return formatter.format(this)
 		} catch(e: Exception){
-			val formatter = SimpleDateFormat(pattern.format, Locale.getDefault())
 			""
 		}
 	}
@@ -58,4 +58,17 @@ object DateUtilities {
 	private fun isYesterday(timeStamp: Long): Boolean {
 		return DateUtils.isToday(timeStamp + DateUtils.DAY_IN_MILLIS)
 	}
+
+	private fun isYesterdaySecond(timeStamp: Long): Boolean {
+		val c1 = Calendar.getInstance()
+		c1.add(Calendar.DAY_OF_YEAR, -1)
+
+		val c2 = Calendar.getInstance()
+		c2.timeInMillis = timeStamp
+
+		return c1.get(Calendar.YEAR) == c2.get(Calendar.YEAR) &&
+				c1.get(Calendar.DAY_OF_YEAR) == c2.get(Calendar.DAY_OF_YEAR)
+
+	}
+
 }

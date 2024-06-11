@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,10 +30,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -40,8 +45,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ehsanmsz.mszprogressindicator.progressindicator.BallClipRotateProgressIndicator
+import com.ehsanmsz.mszprogressindicator.progressindicator.BallPulseProgressIndicator
+import com.ehsanmsz.mszprogressindicator.progressindicator.LineScaleProgressIndicator
 import com.neocalc.neocalc.R
+import com.neocalc.neocalc.history.domain.entities.HistoryItem
 import com.neocalc.neocalc.history.domain.entities.HistoryType
+import com.neocalc.neocalc.history.domain.entities.ListState
+import com.neocalc.neocalc.history.presentation.components.InfiniteScrollLazyColumn
 
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -64,10 +75,6 @@ fun HistoryScreenContent(
 	onPop: () -> Unit = {},
 	onEvent: (CalculationHistoryEvent) -> Unit = {}
 ){
-	LaunchedEffect(key1 = true) {
-		onEvent(CalculationHistoryEvent.Fetch)
-	}
-
 	Scaffold(
 		topBar = {
 			AppBarSection(
@@ -77,18 +84,19 @@ fun HistoryScreenContent(
 			)
 		}
 	) { paddingValues ->
-		LazyColumn(
+		InfiniteScrollLazyColumn(
 			modifier = Modifier
 				.padding(paddingValues = paddingValues)
 				.background(MaterialTheme.colorScheme.surface)
-				.fillMaxSize(1f),
-			verticalArrangement = Arrangement.spacedBy(20.dp)
-		) {
-			itemsIndexed(state.value.history) { index, item ->
+				.fillMaxSize(),
+			items = state.value.history,
+			itemKey = { it.hashCode() },
+			itemContent = { item, lazyListScope ->
 				when (item.type) {
 					HistoryType.Date -> {
-						if (index != 0) {
-							this@LazyColumn.itemDivider(Modifier, Color.DarkGray, 2.dp)
+						val isFirstItem = state.value.history.indexOf(item) == 0
+						if (!isFirstItem) {
+							lazyListScope.ItemDivider(Modifier, Color.DarkGray, 2.dp)
 						}
 						DateItem(date = item.date ?: "")
 					}
@@ -100,9 +108,31 @@ fun HistoryScreenContent(
 						)
 					}
 				}
-			}
-		}
-
+			},
+			loadingContent = {
+				LineScaleProgressIndicator(
+					lineSpacing = 6.dp,
+					minLineHeight = 20.dp,
+					maxLineHeight = 50.dp,
+					lineWidth = 5.dp,
+					color = Color.Blue
+				)
+			},
+			loadingMoreContent = {
+				LineScaleProgressIndicator(
+					lineSpacing = 6.dp,
+					minLineHeight = 20.dp,
+					maxLineHeight = 50.dp,
+					lineWidth = 5.dp,
+					color = Color.Blue
+				)
+			},
+			loadMore = { onEvent(CalculationHistoryEvent.Fetch) },
+			canLoadMoreData = state.value.canPaginate,
+			verticalArrangement = Arrangement.spacedBy(20.dp),
+			loading = state.value.listState == ListState.LOADING,
+			loadingMore = state.value.listState == ListState.PAGINATING
+		)
 	}
 }
 
@@ -207,7 +237,7 @@ fun DateItem(date: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun LazyListScope.itemDivider(
+fun LazyListScope.ItemDivider(
 	modifier: Modifier = Modifier,
 	dividerColor: Color = Color.DarkGray,
 	dividerHeight: Dp = 2.dp
@@ -219,3 +249,9 @@ fun LazyListScope.itemDivider(
 			.background(dividerColor)
 	)
 }
+
+fun LazyListState.hasReachedBottom(buffer: Int = 1): Boolean {
+	val lastVisibleItem = this.layoutInfo.visibleItemsInfo.lastOrNull()
+	return lastVisibleItem?.index != 0 && (lastVisibleItem?.index == this.layoutInfo.totalItemsCount - 3)
+}
+
