@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -23,9 +22,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +42,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neocalc.neocalc.R
+import com.neocalc.neocalc.calculation.presentation.component.AppThemeDialog
 import com.neocalc.neocalc.calculation.presentation.component.AutoSizeText
 import com.neocalc.neocalc.calculation.presentation.component.CalculatorButton
 import com.neocalc.neocalc.ui.theme.CyanBlue
@@ -56,13 +59,15 @@ fun CalculatorScreen(
 
     val state = viewModel.uiState
     val uiState = state.collectAsState()
+    var openDialog by remember { mutableStateOf(false) }
 
     Box(modifier = modifier) {
         AppBarSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
-            navigateToHistory = navigateToHistory
+            onNavigateToHistory = navigateToHistory,
+            onDisplayDialog = { openDialog = true }
         )
 
         Column(
@@ -70,6 +75,7 @@ fun CalculatorScreen(
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter),
         ) {
+
             ResultSection(uiState = uiState)
 
             Spacer(modifier = modifier.height(buttonSpacing))
@@ -90,11 +96,23 @@ fun CalculatorScreen(
             )
         }
     }
+
+    if(openDialog) {
+        AppThemeDialog(onDismiss = {
+            openDialog = !openDialog
+        }) {
+
+        }
+    }
 }
 
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-fun AppBarSection(modifier: Modifier = Modifier, navigateToHistory: () -> Unit = {}) {
+fun AppBarSection(
+    modifier: Modifier = Modifier,
+    onNavigateToHistory: () -> Unit = {},
+    onDisplayDialog: () -> Unit = {}
+) {
     Surface {
         Row(
             modifier = modifier
@@ -106,7 +124,7 @@ fun AppBarSection(modifier: Modifier = Modifier, navigateToHistory: () -> Unit =
                 if (isSystemInDarkTheme()) R.drawable.ic_calculator_light_mode else R.drawable.ic_calculator_dark_mode
 
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = navigateToHistory) {
+            IconButton(onClick = onNavigateToHistory) {
                 Icon(
                     modifier = Modifier.size(24.dp),
                     painter = painterResource(id = R.drawable.ic_calculator_history),
@@ -114,7 +132,7 @@ fun AppBarSection(modifier: Modifier = Modifier, navigateToHistory: () -> Unit =
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = { }) {
+            IconButton(onClick = onDisplayDialog) {
                 Icon(
                     modifier = Modifier.size(26.dp),
                     painter = painterResource(id = uiModeIcon),
