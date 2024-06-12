@@ -4,16 +4,10 @@ import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,7 +21,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -36,12 +29,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.ehsanmsz.mszprogressindicator.progressindicator.LineScaleProgressIndicator
 import com.neocalc.neocalc.R
+import com.neocalc.neocalc.history.presentation.components.ItemDivider
 import com.neocalc.neocalc.history.domain.entities.HistoryType
+import com.neocalc.neocalc.history.domain.entities.ListState
+import com.neocalc.neocalc.history.presentation.components.InfiniteScrollLazyColumn
 
 @Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -64,10 +60,6 @@ fun HistoryScreenContent(
 	onPop: () -> Unit = {},
 	onEvent: (CalculationHistoryEvent) -> Unit = {}
 ){
-	LaunchedEffect(key1 = true) {
-		onEvent(CalculationHistoryEvent.Fetch)
-	}
-
 	Scaffold(
 		topBar = {
 			AppBarSection(
@@ -77,18 +69,19 @@ fun HistoryScreenContent(
 			)
 		}
 	) { paddingValues ->
-		LazyColumn(
+		InfiniteScrollLazyColumn(
 			modifier = Modifier
 				.padding(paddingValues = paddingValues)
 				.background(MaterialTheme.colorScheme.surface)
-				.fillMaxSize(1f),
-			verticalArrangement = Arrangement.spacedBy(20.dp)
-		) {
-			itemsIndexed(state.value.history) { index, item ->
+				.fillMaxSize(),
+			items = state.value.history,
+			itemKey = { it.hashCode() },
+			itemContent = { item, lazyListScope ->
 				when (item.type) {
 					HistoryType.Date -> {
-						if (index != 0) {
-							this@LazyColumn.itemDivider(Modifier, Color.DarkGray, 2.dp)
+						val isFirstItem = state.value.history.indexOf(item) == 0
+						if (!isFirstItem) {
+							lazyListScope.ItemDivider(Modifier, Color.DarkGray, 2.dp)
 						}
 						DateItem(date = item.date ?: "")
 					}
@@ -100,9 +93,31 @@ fun HistoryScreenContent(
 						)
 					}
 				}
-			}
-		}
-
+			},
+			loadingContent = {
+				LineScaleProgressIndicator(
+					lineSpacing = 6.dp,
+					minLineHeight = 20.dp,
+					maxLineHeight = 50.dp,
+					lineWidth = 5.dp,
+					color = Color.Blue
+				)
+			},
+			loadingMoreContent = {
+				LineScaleProgressIndicator(
+					lineSpacing = 6.dp,
+					minLineHeight = 20.dp,
+					maxLineHeight = 50.dp,
+					lineWidth = 5.dp,
+					color = Color.Blue
+				)
+			},
+			loadMore = { onEvent(CalculationHistoryEvent.Fetch) },
+			canLoadMoreData = state.value.canPaginate,
+			verticalArrangement = Arrangement.spacedBy(20.dp),
+			loading = state.value.listState == ListState.LOADING,
+			loadingMore = state.value.listState == ListState.PAGINATING
+		)
 	}
 }
 
@@ -188,34 +203,15 @@ fun HistoryItem(
 
 @Composable
 fun DateItem(date: String, modifier: Modifier = Modifier) {
-	Column(modifier.fillMaxWidth()) {
-
-		// might place this in lazy list
-		Spacer(modifier = Modifier.height(10.dp))
-
-		Text(
-			text = date,
-			modifier = modifier
-				.fillMaxWidth()
-				.padding(horizontal = 16.dp),
-			textAlign = TextAlign.Start,
-			style = MaterialTheme.typography.titleMedium.copy(
-				color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
-			)
-		)
-	}
-}
-
-@Composable
-fun LazyListScope.itemDivider(
-	modifier: Modifier = Modifier,
-	dividerColor: Color = Color.DarkGray,
-	dividerHeight: Dp = 2.dp
-) {
-	Box(
+	Text(
+		text = date,
 		modifier = modifier
 			.fillMaxWidth()
-			.height(dividerHeight)
-			.background(dividerColor)
+			.padding(vertical = 10.dp, horizontal = 16.dp),
+		textAlign = TextAlign.Start,
+		style = MaterialTheme.typography.titleMedium.copy(
+			color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+		)
 	)
 }
+

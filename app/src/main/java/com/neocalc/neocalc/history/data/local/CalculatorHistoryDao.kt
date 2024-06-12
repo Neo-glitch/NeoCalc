@@ -13,8 +13,14 @@ interface CalculatorHistoryDao {
 	@Upsert
 	suspend fun upsertCalculationHistory(history: CalculationHistoryModel)
 
-	@Query("SELECT * FROM ${Constants.CALCULATION_HISTORY_TABLE} order by created_at desc")
+	@Query("SELECT * FROM ${Constants.CALCULATION_HISTORY_TABLE} ORDER BY created_at DESC")
 	suspend fun getCalculationHistory(): List<CalculationHistoryModel>
+
+	@Query("SELECT * FROM ${Constants.CALCULATION_HISTORY_TABLE} ORDER BY created_at DESC LIMIT :pageSize OFFSET :pageOffset")
+	suspend fun getHistory(pageSize: Int, pageOffset: Int) : List<CalculationHistoryModel>
+
+	@Query("SELECT COUNT(*) FROM ${Constants.CALCULATION_HISTORY_TABLE}")
+	suspend fun getItemCount(): Int
 
 	@Query("DELETE FROM ${Constants.CALCULATION_HISTORY_TABLE}")
 	suspend fun clearCalculationHistory()

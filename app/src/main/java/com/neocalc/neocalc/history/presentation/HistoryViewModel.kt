@@ -2,7 +2,6 @@ package com.neocalc.neocalc.history.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neocalc.neocalc.core.data.util.Resource
 import com.neocalc.neocalc.core.util.DateUtilities
 import com.neocalc.neocalc.core.util.DateUtilities.DateFormatterPattern
 import com.neocalc.neocalc.core.util.DateUtilities.toDateString
@@ -10,21 +9,23 @@ import com.neocalc.neocalc.core.util.DateUtilities.toFormattedDate
 import com.neocalc.neocalc.history.domain.entities.CalculationHistory
 import com.neocalc.neocalc.history.domain.entities.HistoryItem
 import com.neocalc.neocalc.history.domain.entities.HistoryType
+import com.neocalc.neocalc.history.domain.entities.ListState
 import com.neocalc.neocalc.history.domain.use_cases.ClearCalculationHistoryUseCase
 import com.neocalc.neocalc.history.domain.use_cases.GetCalculationHistoryUseCase
+import com.neocalc.neocalc.history.domain.use_cases.GetItemCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Date
 import javax.inject.Inject
 
 
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
 	private val getHistoryUseCase: GetCalculationHistoryUseCase,
-	private val clearHistoryUseCase: ClearCalculationHistoryUseCase
+	private val clearHistoryUseCase: ClearCalculationHistoryUseCase,
+	private val getItemCountUseCase : GetItemCountUseCase
 ): ViewModel() {
 
 	private val _uiState = MutableStateFlow(CalculationHistoryUiState())
@@ -34,9 +35,13 @@ class HistoryViewModel @Inject constructor(
 	// key is date value and the list of items having that date
 	private val historyItemsMap = mutableMapOf<String, List<CalculationHistory>>()
 
+	init {
+		getItemCount()
+	}
+
 	fun onEvent(event: CalculationHistoryEvent){
 		when(event){
-			CalculationHistoryEvent.Fetch -> getCalculationHistory()
+			CalculationHistoryEvent.Fetch -> getHistory()
 			CalculationHistoryEvent.Clear -> clearHistory()
 		}
 	}
@@ -50,17 +55,41 @@ class HistoryViewModel @Inject constructor(
 		}
 	}
 
-	private fun getCalculationHistory() {
-		viewModelScope.launch{
-			_uiState.update{ it.copy(isLoading = true) }
-			when (val result = getHistoryUseCase()) {
-				is Resource.Error -> {
-					_uiState.update{it.copy(isLoading = false)}
+	private fun getHistory() {
+		viewModelScope.launch {
+			_uiState.update { it.copy(isLoading = true) }
+			var page = uiState.value.page
+			var listState = uiState.value.listState
+			var canPaginate = uiState.value.canPaginate
+			var history = uiState.value.history
+			val totalItemCount = uiState.value.totalItemCount
+
+
+			if(page == 1 || (page != 1 && canPaginate) && listState == ListState.IDLE){
+				listState = if (page == 1) ListState.LOADING else ListState.PAGINATING
+				_uiState.update { it.copy(listState = listState)  }
+
+				val result = getHistoryUseCase(page, 30)
+				val historyItems = mapToHistoryItems(result)
+
+				history = if (page == 1) {
+					historyItems
+				} else {
+					listOf<HistoryItem>().plus(history.plus(historyItems))
 				}
-				is Resource.Success<*> -> {
-					val history = result.data as List<*>
-					val historyItems = mapToHistoryItems(history as List<CalculationHistory>)
-					_uiState.update { it.copy(isLoading = false, history = historyItems) }
+
+				canPaginate = history.filter{it.type == HistoryType.History}.size < totalItemCount
+				listState = ListState.IDLE
+
+				if(canPaginate)
+					page += 1
+
+				// update the uiState
+				_uiState.update {
+					it.copy(
+						isLoading = false, page = page, canPaginate = canPaginate,
+						listState = listState, history = history
+					)
 				}
 			}
 		}
@@ -98,6 +127,24 @@ class HistoryViewModel @Inject constructor(
 				historyItemsMap[date] = currentItemsForKey + historyList
 			}
 		}
+	}
+
+	private fun getItemCount() {
+		viewModelScope.launch{
+			val itemCount = getItemCountUseCase()
+			_uiState.update { it.copy(totalItemCount = itemCount) }
+			getHistory()
+		}
+	}
+
+	override fun onCleared() {
+		_uiState.update { it.copy(page = 1, listState = ListState.IDLE, canPaginate = false) }
+		super.onCleared()
+	}
+
+
+	companion object{
+		const val PAGE_SIZE = 30
 	}
 
 }

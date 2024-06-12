@@ -96,10 +96,11 @@ dependencies {
     implementation(libs.hilt)
     ksp(libs.hilt.annotation.processor)
     implementation(libs.hilt.navigation)
-
     // paging 3
     implementation(libs.paging.runtime)
     implementation(libs.paging.compose)
+    // compose Spin kit Loader
+    implementation(libs.msz.progress.indicator)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

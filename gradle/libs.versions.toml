@@ -18,7 +18,8 @@ hilt = "2.48"
 org-jetbrains-kotlin-android = "1.8.0"
 hilt-navigation= "1.0.0"
 paging = "3.1.1"
-pagingCompose = "1.0.0-alpha16"
+paging-compose = "1.0.0-alpha16"
+msz-progress-indicator = "0.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,7 +48,8 @@ hilt = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt
 hilt-annotation-processor = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation" }
 paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose"}
+paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging-compose"}
+msz-progress-indicator = { group = "com.ehsanmsz", name = "msz-progress-indicator", version.ref = "msz-progress-indicator"}
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
