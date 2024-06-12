@@ -20,7 +20,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.neocalc.neocalc.history.presentation.hasReachedBottom
+import com.neocalc.neocalc.history.presentation.utils.hasReachedBottom
 
 @Composable
 fun <T> InfiniteScrollLazyColumn(
