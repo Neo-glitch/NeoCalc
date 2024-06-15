@@ -23,7 +23,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -65,6 +64,7 @@ fun HistoryScreenContent(
 	Scaffold(
 		topBar = {
 			AppBarSection(
+				state.value.history.isNotEmpty(),
 				Modifier,
 				onClear = { onEvent(CalculationHistoryEvent.Clear) },
 				pop = onPop
@@ -126,6 +126,7 @@ fun HistoryScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBarSection(
+	hasHistory: Boolean,
 	modifier: Modifier = Modifier,
 	onClear: () -> Unit = {},
 	pop: () -> Unit = {}
@@ -148,12 +149,14 @@ fun AppBarSection(
 			}
 		},
 		actions = {
-			IconButton(onClick = onClear) {
-				Icon(
-					painter = painterResource(id = R.drawable.ic_calculator_clear),
-					contentDescription = null
-				)
-			}
+
+			if (hasHistory)
+				IconButton(onClick = onClear) {
+					Icon(
+						painter = painterResource(id = R.drawable.ic_calculator_clear),
+						contentDescription = null
+					)
+				}
 		}
 	)
 }
