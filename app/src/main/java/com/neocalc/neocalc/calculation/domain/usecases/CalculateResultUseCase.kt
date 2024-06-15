@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.calculation.domain.use_cases
+package com.neocalc.neocalc.calculation.domain.usecases
 
 import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
 import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository

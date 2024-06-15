@@ -101,6 +101,13 @@ dependencies {
     implementation(libs.paging.compose)
     // compose Spin kit Loader
     implementation(libs.msz.progress.indicator)
+    // datastore
+    implementation(libs.datastore)
+    // gson
+    implementation(libs.gson)
+    // compose-lifecycle
+    implementation(libs.compose.lifecycle)
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

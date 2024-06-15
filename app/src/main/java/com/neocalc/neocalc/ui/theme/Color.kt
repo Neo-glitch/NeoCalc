@@ -2,10 +2,6 @@ package com.neocalc.neocalc.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-
-val Pink80 = Color(0xFFEFB8C8)
-val Pink40 = Color(0xFF7D5260)
-
 val MediumGray = Color(0xFF2E2E2E)
 val LightGray = Color(0xFF818181)
 val Orange = Color(0xFFFF9800)

@@ -18,31 +18,25 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Color.Black,
+    primary = Blue_2,
     onPrimary = Color.White,
-    tertiary = Pink80,
+    secondary = MediumGray,
+    onSecondary = Color.White,
     surface = Color.Black,
     onSurface = Color.White,
-    error = Color.Red
+    surfaceContainer = MediumGray,
+    error = Color.Red,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Color.White,
-    onPrimary = Color.Black,
-    tertiary = Pink40,
+    primary = Blue_2,
+    onPrimary = Color.White,
+    secondary = LinkWhiteDarker,
+    onSecondary = Color.Black,
     surface = Color.White,
     onSurface = Color.Black,
-    error = Color.Red
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
-    onPrimary = Color.White,
-    onSecondary = Color.White,
-    onTertiary = Color.White,
-    onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    surfaceContainer = LinkWhite,
+    error = Color.Red,
 )
 
 @Composable
@@ -53,10 +47,10 @@ fun NeoCalcTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+//        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+//            val context = LocalContext.current
+//            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+//        }
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
@@ -70,7 +64,7 @@ fun NeoCalcTheme(
         }
     }
 
-    val extendedColors = getExtendedColors(isSystemInDarkTheme())
+    val extendedColors = getExtendedColors(darkTheme)
     CompositionLocalProvider(LocalExtendedColors provides extendedColors) {
         MaterialTheme(
             colorScheme = colorScheme,
