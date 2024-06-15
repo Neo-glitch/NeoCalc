@@ -2,11 +2,11 @@ package com.neocalc.neocalc.calculation.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
+import com.neocalc.neocalc.calculation.domain.usecases.AppendOperationToInputUseCase
 import com.neocalc.neocalc.calculation.domain.usecases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.DeleteLastCharacterUseCase
 import com.neocalc.neocalc.calculation.domain.usecases.FormatCalculationInputUseCase
 import com.neocalc.neocalc.calculation.domain.usecases.ValidateCalculationInputUseCase
-import com.neocalc.neocalc.calculation.domain.validation.CalculationInputValidator
 import com.neocalc.neocalc.core.data.util.Resource
 import com.neocalc.neocalc.core.util.canAddDecimal
 import com.neocalc.neocalc.core.util.isLastCharBasicOperator
@@ -25,7 +25,9 @@ class CalculationViewModel @Inject constructor(
     private val calculateResultUseCase: CalculateResultUseCase,
     private val upsertCalculationHistoryUseCase: UpsertCalculationHistoryUseCase,
     private val formatCalculationInputUseCase: FormatCalculationInputUseCase,
-    private val validateCalculationInputUseCase: ValidateCalculationInputUseCase
+    private val validateCalculationInputUseCase: ValidateCalculationInputUseCase,
+    private val appendOperationToInputUseCase: AppendOperationToInputUseCase,
+    private val deleteLastCharacterUseCase: DeleteLastCharacterUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
@@ -57,32 +59,10 @@ class CalculationViewModel @Inject constructor(
         performCalculationOnInputChange()
     }
 
-    private fun enterOperation(operatorEvent: CalculatorOperation) {
-        val state = uiState.value
-        var input = state.input
-
-        if (state.input.isLastCharBasicOperator()) {
-            // last character is operator, replace it
-            val substring = input.substring(0, input.length - 1)
-            input = substring + operatorEvent.symbol
-            _uiState.update {
-                it.copy(input = input, isEqualsOppDone = false)
-            }
-            performCalculationOnInputChange()
-            return
-        }
-
-        if(input.isBlank()){
-            if(operatorEvent == CalculatorOperation.Add || operatorEvent == CalculatorOperation.Subtract){
-                input += operatorEvent.symbol
-                _uiState.update { it.copy(input = input, isEqualsOppDone = false) }
-            }
-            return
-        }
-
-        input += operatorEvent.symbol
+    private fun enterOperation(operation: CalculatorOperation) {
+        val inputWithOperator = appendOperationToInputUseCase(uiState.value.input, operation)
         _uiState.update {
-            it.copy(input = input, isEqualsOppDone = false)
+            it.copy(input = inputWithOperator, isEqualsOppDone = false)
         }
         performCalculationOnInputChange()
     }
@@ -98,11 +78,11 @@ class CalculationViewModel @Inject constructor(
         val state = uiState.value
         when{
             state.input.isNotBlank() -> {
-              val input = uiState.value.input
-              _uiState.update {
-                  it.copy(input = state.input.substring(0, input.length - 1))
-              }
-              performCalculationOnInputChange()
+                val newInput = deleteLastCharacterUseCase(state.input)
+                _uiState.update {
+                    it.copy(input = newInput, result = "")
+                }
+                performCalculationOnInputChange()
             }
         }
     }
@@ -111,10 +91,9 @@ class CalculationViewModel @Inject constructor(
         val state = uiState.value
         val input = state.input
 
-        if(!CalculationInputValidator.isCalculationInputValid(input)) return
-        val formattedInput = CalculationInputFormatter.formatInput(input)
+        if (!validateCalculationInputUseCase(input)) return
 
-        when (val result = calculateResultUseCase(formattedInput)) {
+        when (val result = calculateResultUseCase(formatCalculationInputUseCase(input))) {
             is Resource.Error -> _uiState.update {
                 it.copy(
                     result = result.message,
@@ -123,8 +102,14 @@ class CalculationViewModel @Inject constructor(
             }
 
             is Resource.Success<*> -> {
+                val cleanedInput = if (input.isLastCharBasicOperator()) {
+                    deleteLastCharacterUseCase(input)
+                } else {
+                    input
+                }
+
                 saveOperationToHistory(
-                    input, result.data as String
+                    cleanedInput, result.data as String
                 )
 
                 _uiState.update {

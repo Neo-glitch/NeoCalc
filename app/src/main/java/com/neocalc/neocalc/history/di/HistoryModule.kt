@@ -1,5 +1,7 @@
 package com.neocalc.neocalc.history.di
 
+import com.neocalc.neocalc.calculation.domain.usecases.AppendOperationToInputUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.DeleteLastCharacterUseCase
 import com.neocalc.neocalc.history.data.local.CalculatorHistoryDatabase
 import com.neocalc.neocalc.history.data.repository.CalculationHistoryRepositoryImpl
 import com.neocalc.neocalc.history.domain.repository.CalculationHistoryRepository
@@ -42,6 +44,14 @@ object HistoryModule {
 	@Provides
 	@Singleton
 	fun provideGetItemCountUseCase(repository: CalculationHistoryRepository) = GetItemCountUseCase(repository)
+
+	@Provides
+	@Singleton
+	fun provideAppendOperationToInputCase() = AppendOperationToInputUseCase()
+
+	@Provides
+	@Singleton
+	fun provideRemoveLastCharFromInputUSeCase() = DeleteLastCharacterUseCase()
 
 
 
