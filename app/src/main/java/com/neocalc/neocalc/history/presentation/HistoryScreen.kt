@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +26,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
@@ -32,9 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ehsanmsz.mszprogressindicator.progressindicator.LineScaleProgressIndicator
 import com.neocalc.neocalc.R
-import com.neocalc.neocalc.history.presentation.components.ItemDivider
 import com.neocalc.neocalc.history.domain.entities.HistoryType
 import com.neocalc.neocalc.history.domain.entities.ListState
 import com.neocalc.neocalc.history.presentation.components.InfiniteScrollLazyColumn
@@ -43,13 +45,13 @@ import com.neocalc.neocalc.history.presentation.components.InfiniteScrollLazyCol
 @Composable
 fun HistoryScreen(
 	viewModel : HistoryViewModel = hiltViewModel<HistoryViewModel>(),
-	pop: () -> Unit = {}
+	onPop: () -> Unit = {}
 ) {
-	val state = viewModel.uiState.collectAsState()
+	val state = viewModel.uiState.collectAsStateWithLifecycle()
 
 	HistoryScreenContent(
 		state  = state,
-		onPop = pop,
+		onPop = onPop,
 		onEvent = viewModel::onEvent
 	)
 }
@@ -81,7 +83,7 @@ fun HistoryScreenContent(
 					HistoryType.Date -> {
 						val isFirstItem = state.value.history.indexOf(item) == 0
 						if (!isFirstItem) {
-							lazyListScope.ItemDivider(Modifier, Color.DarkGray, 2.dp)
+							HorizontalDivider(modifier = Modifier.fillMaxWidth())
 						}
 						DateItem(date = item.date ?: "")
 					}
@@ -128,13 +130,13 @@ fun AppBarSection(
 	onClear: () -> Unit = {},
 	pop: () -> Unit = {}
 ) {
-
 	TopAppBar(
 		colors = TopAppBarDefaults.topAppBarColors(
-			containerColor = MaterialTheme.colorScheme.background
+			containerColor = MaterialTheme.colorScheme.surfaceContainer
 		),
 		modifier = modifier
-			.fillMaxWidth(),
+			.fillMaxWidth()
+			.shadow(elevation = 4.dp),
 		title = { Text(text = "History") },
 		navigationIcon = {
 			IconButton(onClick = pop) {
@@ -163,7 +165,6 @@ fun HistoryItem(
 	result: String,
 	modifier: Modifier = Modifier
 ) {
-
 	Column(
 		modifier
 			.fillMaxWidth()

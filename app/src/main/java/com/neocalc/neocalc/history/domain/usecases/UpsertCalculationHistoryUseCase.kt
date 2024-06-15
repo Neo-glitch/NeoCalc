@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.history.domain.use_cases
+package com.neocalc.neocalc.history.domain.usecases
 
 import com.neocalc.neocalc.history.data.mapper.toModel
 import com.neocalc.neocalc.history.domain.entities.CalculationHistory

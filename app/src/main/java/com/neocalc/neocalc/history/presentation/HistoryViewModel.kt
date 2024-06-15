@@ -10,9 +10,9 @@ import com.neocalc.neocalc.history.domain.entities.CalculationHistory
 import com.neocalc.neocalc.history.domain.entities.HistoryItem
 import com.neocalc.neocalc.history.domain.entities.HistoryType
 import com.neocalc.neocalc.history.domain.entities.ListState
-import com.neocalc.neocalc.history.domain.use_cases.ClearCalculationHistoryUseCase
-import com.neocalc.neocalc.history.domain.use_cases.GetCalculationHistoryUseCase
-import com.neocalc.neocalc.history.domain.use_cases.GetItemCountUseCase
+import com.neocalc.neocalc.history.domain.usecases.ClearCalculationHistoryUseCase
+import com.neocalc.neocalc.history.domain.usecases.GetCalculationHistoryUseCase
+import com.neocalc.neocalc.history.domain.usecases.GetItemCountUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -3,13 +3,15 @@ package com.neocalc.neocalc.calculation.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
-import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.FormatCalculationInputUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.ValidateCalculationInputUseCase
 import com.neocalc.neocalc.calculation.domain.validation.CalculationInputValidator
 import com.neocalc.neocalc.core.data.util.Resource
 import com.neocalc.neocalc.core.util.canAddDecimal
 import com.neocalc.neocalc.core.util.isLastCharBasicOperator
 import com.neocalc.neocalc.history.domain.entities.CalculationHistory
-import com.neocalc.neocalc.history.domain.use_cases.UpsertCalculationHistoryUseCase
+import com.neocalc.neocalc.history.domain.usecases.UpsertCalculationHistoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,23 +21,24 @@ import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-class CalculatorViewModel @Inject constructor(
+class CalculationViewModel @Inject constructor(
     private val calculateResultUseCase: CalculateResultUseCase,
-    private val upsertCalculationHistoryUseCase: UpsertCalculationHistoryUseCase
+    private val upsertCalculationHistoryUseCase: UpsertCalculationHistoryUseCase,
+    private val formatCalculationInputUseCase: FormatCalculationInputUseCase,
+    private val validateCalculationInputUseCase: ValidateCalculationInputUseCase
 ) : ViewModel() {
-
 
     private val _uiState = MutableStateFlow(CalculatorScreenUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun onEvent(event: CalculatorEvent){
+    fun onEvent(event: CalculationEvent){
         when(event){
-            CalculatorEvent.Calculate -> calculate()
-            CalculatorEvent.Clear -> clear()
-            CalculatorEvent.Decimal -> enterDecimal()
-            CalculatorEvent.Delete -> delete()
-            is CalculatorEvent.NumberEvent -> enterNumber(event.number)
-            is CalculatorEvent.Operation -> enterOperation(event.operatorEvent)
+            CalculationEvent.Calculate -> calculate()
+            CalculationEvent.Clear -> clear()
+            CalculationEvent.InputDecimal -> enterDecimal()
+            CalculationEvent.Delete -> delete()
+            is CalculationEvent.InputNumber -> enterNumber(event.number)
+            is CalculationEvent.Operation -> enterOperation(event.operatorOperation)
         }
     }
 
@@ -139,10 +142,10 @@ class CalculatorViewModel @Inject constructor(
     private fun performCalculationOnInputChange(){
         val input = uiState.value.input
 
-        if(!CalculationInputValidator.isCalculationInputValid(input)) return
-        val formattedInput = CalculationInputFormatter.formatInput(input)
+        if(!validateCalculationInputUseCase(input))
+            return
 
-        when (val result = calculateResultUseCase(formattedInput)) {
+        when (val result = calculateResultUseCase(formatCalculationInputUseCase(input))) {
             is Resource.Error -> _uiState.update { it.copy(result = "", isError = false) }
             is Resource.Success<*> -> {
                 _uiState.update {
@@ -171,10 +174,5 @@ class CalculatorViewModel @Inject constructor(
     private fun clear(){
         // resets the state
         _uiState.update { CalculatorScreenUiState() }
-    }
-
-
-    companion object{
-        private const val MAX_NUM_LENGTH = 8
     }
 }

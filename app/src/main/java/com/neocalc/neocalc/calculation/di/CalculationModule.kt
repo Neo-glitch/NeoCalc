@@ -3,14 +3,14 @@ package com.neocalc.neocalc.calculation.di
 import android.app.Application
 import com.faendir.rhino_android.RhinoAndroidHelper
 import com.neocalc.neocalc.calculation.data.repository.CalculationRepositoryImpl
-import com.neocalc.neocalc.calculation.domain.formatter.CalculationInputFormatter
 import com.neocalc.neocalc.calculation.domain.repository.CalculationRepository
-import com.neocalc.neocalc.calculation.domain.use_cases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.CalculateResultUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.FormatCalculationInputUseCase
+import com.neocalc.neocalc.calculation.domain.usecases.ValidateCalculationInputUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import org.mozilla.javascript.ScriptableObject
 import javax.inject.Singleton
 
 
@@ -37,5 +37,13 @@ object CalculationModule {
 	): CalculateResultUseCase{
 		return CalculateResultUseCase(calculationRepository)
 	}
+
+	@Singleton
+	@Provides
+	fun provideValidateCalculationInputUseCase() = ValidateCalculationInputUseCase()
+
+	@Singleton
+	@Provides
+	fun provideFormatCalculationInputUseCase() = FormatCalculationInputUseCase()
 
 }

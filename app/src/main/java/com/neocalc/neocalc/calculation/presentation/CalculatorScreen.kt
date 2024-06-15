@@ -1,6 +1,7 @@
 package com.neocalc.neocalc.calculation.presentation
 
-import android.content.res.Configuration
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -23,7 +24,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,14 +37,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.neocalc.neocalc.R
-import com.neocalc.neocalc.calculation.presentation.component.AppThemeDialog
+import com.neocalc.neocalc.calculation.domain.entities.AppTheme
+import com.neocalc.neocalc.core.presentation.component.AppThemeDialog
 import com.neocalc.neocalc.calculation.presentation.component.AutoSizeText
 import com.neocalc.neocalc.calculation.presentation.component.CalculatorButton
+import com.neocalc.neocalc.core.presentation.ThemeEvent
+import com.neocalc.neocalc.core.presentation.ThemeViewModel
 import com.neocalc.neocalc.ui.theme.CyanBlue
 import com.neocalc.neocalc.ui.theme.ExtendedTheme
 import com.neocalc.neocalc.ui.theme.poppins
@@ -52,17 +55,30 @@ import com.neocalc.neocalc.ui.theme.poppins
 @Composable
 fun CalculatorScreen(
     modifier: Modifier = Modifier,
-    viewModel: CalculatorViewModel,
+    themeViewModel: ThemeViewModel,
+    calculationViewModel: CalculationViewModel,
     buttonSpacing: Dp = 15.dp,
     navigateToHistory: () -> Unit = {}
 ) {
+    val themeState = themeViewModel.appTheme.collectAsStateWithLifecycle()
+    val uiState = calculationViewModel.uiState.collectAsStateWithLifecycle()
 
-    val state = viewModel.uiState
-    val uiState = state.collectAsState()
     var openDialog by remember { mutableStateOf(false) }
+
+    if (openDialog) {
+        AppThemeDialog(
+            previousAppTheme = themeState.value,
+            onDismiss = { openDialog = !openDialog },
+            onConfirm = {appTheme ->
+                themeViewModel.onEvent(ThemeEvent.SaveAppTheme(appTheme))
+                openDialog = !openDialog
+            }
+        )
+    }
 
     Box(modifier = modifier) {
         AppBarSection(
+            theme = themeState,
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter),
@@ -78,41 +94,36 @@ fun CalculatorScreen(
 
             ResultSection(uiState = uiState)
 
-            Spacer(modifier = modifier.height(buttonSpacing))
+            Spacer(modifier = Modifier.height(buttonSpacing))
 
             CalculatorInputSection(
                 modifier,
                 buttonSpacing,
-                onCalculateInput = { viewModel.onEvent(CalculatorEvent.Calculate) },
-                onClearInput = { viewModel.onEvent(CalculatorEvent.Clear) },
-                onDecimalInput = { viewModel.onEvent(CalculatorEvent.Decimal) },
-                onDeleteInput = { viewModel.onEvent(CalculatorEvent.Delete) },
+                onCalculateInput = { calculationViewModel.onEvent(CalculationEvent.Calculate) },
+                onClearInput = { calculationViewModel.onEvent(CalculationEvent.Clear) },
+                onDecimalInput = { calculationViewModel.onEvent(CalculationEvent.InputDecimal) },
+                onDeleteInput = { calculationViewModel.onEvent(CalculationEvent.Delete) },
                 onNumberInput = { number ->
-                    viewModel.onEvent(CalculatorEvent.NumberEvent(number))
+                    calculationViewModel.onEvent(CalculationEvent.InputNumber(number))
                 },
                 onOperationInput = { calculatorOperation ->
-                    viewModel.onEvent(CalculatorEvent.Operation(calculatorOperation))
+                    calculationViewModel.onEvent(CalculationEvent.Operation(calculatorOperation))
                 }
             )
         }
     }
 
-    if(openDialog) {
-        AppThemeDialog(onDismiss = {
-            openDialog = !openDialog
-        }) {
-
-        }
-    }
 }
 
-@Preview(showSystemUi = true, showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 fun AppBarSection(
+    theme: State<AppTheme>,
     modifier: Modifier = Modifier,
     onNavigateToHistory: () -> Unit = {},
     onDisplayDialog: () -> Unit = {}
 ) {
+    val currentThemeState by remember { theme }
+
     Surface {
         Row(
             modifier = modifier
@@ -120,8 +131,6 @@ fun AppBarSection(
                 .padding(vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val uiModeIcon =
-                if (isSystemInDarkTheme()) R.drawable.ic_calculator_light_mode else R.drawable.ic_calculator_dark_mode
 
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onNavigateToHistory) {
@@ -132,16 +141,29 @@ fun AppBarSection(
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
-            IconButton(onClick = onDisplayDialog) {
-                Icon(
-                    modifier = Modifier.size(26.dp),
-                    painter = painterResource(id = uiModeIcon),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurface
-                )
+            Crossfade(
+                targetState = currentThemeState,
+                label = "",
+                animationSpec = tween(durationMillis = 700)
+            ) {
+                val isDarkTheme = when (it) {
+                    AppTheme.DARK_MODE -> true
+                    AppTheme.LIGHT_MODE -> false
+                    AppTheme.SYSTEM_DEFAULT_MODE -> isSystemInDarkTheme()
+                }
+
+                val uiModeIcon =
+                    if (isDarkTheme) R.drawable.ic_calculator_light_mode else R.drawable.ic_calculator_dark_mode
+
+                IconButton(onClick = onDisplayDialog) {
+                    Icon(
+                        modifier = Modifier.size(26.dp),
+                        painter = painterResource(id = uiModeIcon),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
-
-
         }
     }
 }
@@ -208,11 +230,12 @@ fun CalculatorInputSection(
     Column(
         modifier
             .fillMaxWidth()
+            .background(ExtendedTheme.colors.linkWhiteLightBlack)
             .clip(
                 RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
             )
-            .background(ExtendedTheme.colors.linkWhiteLightBlack)
             .padding(20.dp),
+
         verticalArrangement = Arrangement.spacedBy(buttonSpacing)
     ) {
         // first row of calculator input

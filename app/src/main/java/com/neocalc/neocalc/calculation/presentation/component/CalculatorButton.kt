@@ -24,7 +24,7 @@ import com.neocalc.neocalc.ui.theme.poppins
 
 @Composable
 fun CalculatorButton(
-    textColor: Color = MaterialTheme.colorScheme.onPrimary,
+    textColor: Color = MaterialTheme.colorScheme.onSurface,
     symbol: String,
     modifier: Modifier,
     onClick: () -> Unit

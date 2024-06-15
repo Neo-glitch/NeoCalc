@@ -1,4 +1,4 @@
-package com.neocalc.neocalc.calculation.presentation.component
+package com.neocalc.neocalc.core.presentation.component
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,9 +15,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.neocalc.neocalc.ui.theme.Blue_2
 
 data class RadioButtonItem(val id: Int, val title: String)
 
@@ -60,17 +60,17 @@ fun RadioGroupItem(
 				onClick = { onClick(item.id) },
 				role = Role.RadioButton
 			)
-			.padding(16.dp),
+			.padding(vertical = 16.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		RadioButton(
 			selected = selected,
 			onClick = null,
-			colors = RadioButtonDefaults.colors(selectedColor = Color.Blue)
+			colors = RadioButtonDefaults.colors(selectedColor = Blue_2)
 		)
 
-		Spacer(modifier = Modifier.width(8.dp))
+		Spacer(modifier = Modifier.width(15.dp))
 
-		Text(text = item.title, style = MaterialTheme.typography.bodyMedium)
+		Text(text = item.title, style = MaterialTheme.typography.bodyLarge)
 	}
 }
