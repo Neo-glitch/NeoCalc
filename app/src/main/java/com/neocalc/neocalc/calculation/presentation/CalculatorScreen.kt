@@ -153,7 +153,7 @@ fun AppBarSection(
                 }
 
                 val uiModeIcon =
-                    if (isDarkTheme) R.drawable.ic_calculator_light_mode else R.drawable.ic_calculator_dark_mode
+                    if (isDarkTheme) R.drawable.ic_calculator_dark_mode else R.drawable.ic_calculator_light_mode
 
                 IconButton(onClick = onDisplayDialog) {
                     Icon(
