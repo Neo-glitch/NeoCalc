@@ -1,5 +1,6 @@
 package com.neocalc.neocalc.calculation.presentation
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -20,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,47 +72,55 @@ fun CalculatorScreen(
         AppThemeDialog(
             previousAppTheme = themeState.value,
             onDismiss = { openDialog = !openDialog },
-            onConfirm = {appTheme ->
+            onConfirm = { appTheme ->
                 themeViewModel.onEvent(ThemeEvent.SaveAppTheme(appTheme))
                 openDialog = !openDialog
             }
         )
     }
 
-    Box(modifier = modifier) {
-        AppBarSection(
-            theme = themeState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            onNavigateToHistory = navigateToHistory,
-            onDisplayDialog = { openDialog = true }
-        )
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter),
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.surface
+    ) { paddingValues ->
+        Box(
+            modifier = modifier
+                .padding(paddingValues)
+                .fillMaxSize()
         ) {
-
-            ResultSection(uiState = uiState)
-
-            Spacer(modifier = Modifier.height(buttonSpacing))
-
-            CalculatorInputSection(
-                modifier,
-                buttonSpacing,
-                onCalculateInput = { calculationViewModel.onEvent(CalculationEvent.Calculate) },
-                onClearInput = { calculationViewModel.onEvent(CalculationEvent.Clear) },
-                onDecimalInput = { calculationViewModel.onEvent(CalculationEvent.InputDecimal) },
-                onDeleteInput = { calculationViewModel.onEvent(CalculationEvent.Delete) },
-                onNumberInput = { number ->
-                    calculationViewModel.onEvent(CalculationEvent.InputNumber(number))
-                },
-                onOperationInput = { calculatorOperation ->
-                    calculationViewModel.onEvent(CalculationEvent.Operation(calculatorOperation))
-                }
+            AppBarSection(
+                theme = themeState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                onNavigateToHistory = navigateToHistory,
+                onDisplayDialog = { openDialog = true }
             )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+            ) {
+
+                ResultSection(uiState = uiState)
+
+                Spacer(modifier = Modifier.height(buttonSpacing))
+
+                CalculatorInputSection(
+                    modifier,
+                    buttonSpacing,
+                    onCalculateInput = { calculationViewModel.onEvent(CalculationEvent.Calculate) },
+                    onClearInput = { calculationViewModel.onEvent(CalculationEvent.Clear) },
+                    onDecimalInput = { calculationViewModel.onEvent(CalculationEvent.InputDecimal) },
+                    onDeleteInput = { calculationViewModel.onEvent(CalculationEvent.Delete) },
+                    onNumberInput = { number ->
+                        calculationViewModel.onEvent(CalculationEvent.InputNumber(number))
+                    },
+                    onOperationInput = { calculatorOperation ->
+                        calculationViewModel.onEvent(CalculationEvent.Operation(calculatorOperation))
+                    }
+                )
+            }
         }
     }
 
@@ -170,8 +181,8 @@ fun AppBarSection(
 
 @Composable
 fun ResultSection(
-    uiState : State<CalculatorScreenUiState>
-){
+    uiState: State<CalculatorScreenUiState>
+) {
     val scrollState = rememberScrollState()
 
     AutoSizeText(
